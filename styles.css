@@ -1,0 +1,800 @@
+/* ============================================
+   RESET & VARIABLES
+   ============================================ */
+
+:root {
+    --primary-dark: #1e3a5f;
+    --primary-light: #2d5a8c;
+    --accent-gold: #d4a574;
+    --cream: #f5f1e8;
+    --text-dark: #2c3e50;
+    --text-light: #5a6c7d;
+    --border-color: #e0dcd2;
+    --success-color: #4caf50;
+    --success-light: #e8f5e9;
+    
+    --font-display: 'Playfair Display', serif;
+    --font-body: 'Inter', sans-serif;
+    
+    --transition: all 0.3s ease;
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-body);
+    color: var(--text-dark);
+    background-color: var(--cream);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* ============================================
+   BACKGROUND DECORATION
+   ============================================ */
+
+.background-decoration {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        linear-gradient(135deg, rgba(30, 58, 95, 0.03) 0%, rgba(212, 165, 116, 0.02) 100%),
+        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="1" fill="rgba(30,58,95,0.05)"/><circle cx="80" cy="80" r="1" fill="rgba(212,165,116,0.05)"/></svg>');
+    background-size: auto, 100px 100px;
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* ============================================
+   CONTAINER & LAYOUT
+   ============================================ */
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+
+.header {
+    text-align: center;
+    padding: 60px 20px 40px;
+    animation: fadeInDown 0.8s ease;
+}
+
+.header-content {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%);
+    padding: 40px 30px;
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+}
+
+.title {
+    font-family: var(--font-display);
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--cream);
+    margin-bottom: 8px;
+    letter-spacing: -1px;
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    color: var(--accent-gold);
+    font-weight: 500;
+    letter-spacing: 1px;
+}
+
+/* ============================================
+   INTRO SECTION
+   ============================================ */
+
+.intro-section {
+    margin: 40px 0;
+    animation: fadeInUp 0.8s ease 0.1s both;
+}
+
+.intro-content {
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    border-left: 4px solid var(--accent-gold);
+}
+
+.intro-content h2 {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    color: var(--primary-dark);
+    margin-bottom: 20px;
+}
+
+.intro-content p {
+    font-size: 1.05rem;
+    color: var(--text-light);
+    margin-bottom: 16px;
+    line-height: 1.8;
+}
+
+.intro-content strong {
+    color: var(--primary-dark);
+    font-weight: 600;
+}
+
+.divider {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
+    margin-top: 24px;
+}
+
+/* ============================================
+   MAIN CONTENT
+   ============================================ */
+
+.main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    margin: 40px 0;
+}
+
+/* ============================================
+   PRAYER INPUT SECTION
+   ============================================ */
+
+.prayer-input-section {
+    animation: fadeInUp 0.8s ease 0.2s both;
+}
+
+.input-card {
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    border-top: 4px solid var(--primary-dark);
+}
+
+.input-card h3 {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    color: var(--primary-dark);
+    margin-bottom: 8px;
+}
+
+.input-subtitle {
+    color: var(--text-light);
+    margin-bottom: 24px;
+    font-size: 0.95rem;
+}
+
+.prayer-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group input {
+    padding: 14px 16px;
+    font-size: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-family: var(--font-body);
+    transition: var(--transition);
+    background-color: #fafaf8;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary-dark);
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+}
+
+.form-group input::placeholder {
+    color: #a0a0a0;
+}
+
+.btn-submit {
+    padding: 14px 32px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: white;
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow-sm);
+    font-family: var(--font-body);
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-submit:active {
+    transform: translateY(0);
+}
+
+.success-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 24px;
+    background-color: var(--success-light);
+    border-radius: 8px;
+    text-align: center;
+    margin-top: 16px;
+    animation: slideInUp 0.5s ease;
+}
+
+.success-message.hidden {
+    display: none;
+}
+
+.success-icon {
+    width: 48px;
+    height: 48px;
+    background-color: var(--success-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+.success-message p {
+    color: var(--success-color);
+    font-weight: 500;
+    font-size: 1.05rem;
+}
+
+/* ============================================
+   STATS SECTION
+   ============================================ */
+
+.stats-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    animation: fadeInUp 0.8s ease 0.3s both;
+}
+
+.stat-card {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+    transition: var(--transition);
+    border-bottom: 3px solid var(--accent-gold);
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-value {
+    font-family: var(--font-display);
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-bottom: 8px;
+}
+
+.stat-label {
+    color: var(--text-light);
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ============================================
+   CALENDAR SECTION
+   ============================================ */
+
+.calendar-section {
+    animation: fadeInUp 0.8s ease 0.4s both;
+}
+
+.calendar-section h3 {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    color: var(--primary-dark);
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.calendar-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    gap: 16px;
+}
+
+.month-year {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--primary-dark);
+    min-width: 200px;
+    text-align: center;
+}
+
+.btn-nav {
+    padding: 10px 20px;
+    background-color: white;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--primary-dark);
+    transition: var(--transition);
+    font-family: var(--font-body);
+}
+
+.btn-nav:hover {
+    border-color: var(--primary-dark);
+    background-color: var(--cream);
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition);
+    border: 2px solid transparent;
+    background-color: #fafaf8;
+    position: relative;
+}
+
+.calendar-day.other-month {
+    color: #d0d0d0;
+    background-color: #f0f0f0;
+    cursor: default;
+}
+
+.calendar-day.today {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%);
+    color: white;
+    font-weight: 600;
+    box-shadow: var(--shadow-sm);
+}
+
+.calendar-day.has-prayers {
+    border-color: var(--accent-gold);
+    background-color: #fffbf5;
+}
+
+.calendar-day.has-prayers.today {
+    border-color: var(--cream);
+}
+
+.calendar-day:not(.other-month):hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-md);
+}
+
+.calendar-day-number {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.calendar-day-count {
+    font-size: 0.75rem;
+    opacity: 0.8;
+    margin-top: 2px;
+}
+
+/* ============================================
+   PARTICIPANTS SECTION
+   ============================================ */
+
+.participants-section {
+    animation: fadeInUp 0.8s ease 0.5s both;
+}
+
+.participants-section h3 {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    color: var(--primary-dark);
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.participants-list {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.participant-item {
+    padding: 12px 16px;
+    background-color: #fafaf8;
+    border-radius: 8px;
+    border-left: 4px solid var(--accent-gold);
+    animation: slideInLeft 0.4s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.participant-item::before {
+    content: '✦';
+    color: var(--accent-gold);
+    font-size: 1.2rem;
+}
+
+.participant-name {
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+.empty-state {
+    text-align: center;
+    color: var(--text-light);
+    padding: 20px;
+    font-style: italic;
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+
+.footer {
+    text-align: center;
+    padding: 40px 20px;
+    border-top: 1px solid var(--border-color);
+    margin-top: 60px;
+    color: var(--text-light);
+    animation: fadeInUp 0.8s ease 0.6s both;
+}
+
+.footer p {
+    margin: 8px 0;
+}
+
+.footer p:first-child {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    color: var(--primary-dark);
+    font-weight: 600;
+}
+
+.footer-text {
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 768px) {
+    .title {
+        font-size: 2.5rem;
+    }
+
+    .subtitle {
+        font-size: 1rem;
+    }
+
+    .intro-content {
+        padding: 24px;
+    }
+
+    .intro-content h2 {
+        font-size: 1.5rem;
+    }
+
+    .intro-content p {
+        font-size: 0.95rem;
+    }
+
+    .input-card {
+        padding: 24px;
+    }
+
+    .input-card h3 {
+        font-size: 1.4rem;
+    }
+
+    .stats-section {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-value {
+        font-size: 2.5rem;
+    }
+
+    .calendar-section h3 {
+        font-size: 1.4rem;
+    }
+
+    .month-year {
+        font-size: 1.2rem;
+        min-width: auto;
+    }
+
+    .btn-nav {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+    }
+
+    .calendar-controls {
+        flex-wrap: wrap;
+    }
+
+    .calendar-grid {
+        padding: 16px;
+        gap: 6px;
+    }
+
+    .calendar-day {
+        font-size: 0.8rem;
+    }
+
+    .calendar-day-number {
+        font-size: 0.9rem;
+    }
+
+    .calendar-day-count {
+        font-size: 0.65rem;
+    }
+
+    .participants-section h3 {
+        font-size: 1.4rem;
+    }
+
+    .participant-item {
+        padding: 10px 12px;
+        font-size: 0.95rem;
+    }
+
+    .footer {
+        padding: 30px 20px;
+    }
+
+    .footer p:first-child {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 16px;
+    }
+
+    .header {
+        padding: 40px 16px 30px;
+    }
+
+    .header-content {
+        padding: 30px 20px;
+    }
+
+    .title {
+        font-size: 2rem;
+    }
+
+    .subtitle {
+        font-size: 0.9rem;
+    }
+
+    .intro-section {
+        margin: 24px 0;
+    }
+
+    .intro-content {
+        padding: 20px;
+        border-left-width: 3px;
+    }
+
+    .intro-content h2 {
+        font-size: 1.3rem;
+    }
+
+    .intro-content p {
+        font-size: 0.9rem;
+    }
+
+    .main-content {
+        gap: 24px;
+        margin: 24px 0;
+    }
+
+    .input-card {
+        padding: 20px;
+    }
+
+    .input-card h3 {
+        font-size: 1.2rem;
+    }
+
+    .input-subtitle {
+        font-size: 0.85rem;
+    }
+
+    .form-group input {
+        padding: 12px 14px;
+        font-size: 0.95rem;
+    }
+
+    .btn-submit {
+        padding: 12px 24px;
+        font-size: 0.95rem;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+    }
+
+    .calendar-section h3 {
+        font-size: 1.2rem;
+        margin-bottom: 16px;
+    }
+
+    .calendar-controls {
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+
+    .month-year {
+        font-size: 1rem;
+    }
+
+    .btn-nav {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+
+    .calendar-grid {
+        padding: 12px;
+        gap: 4px;
+    }
+
+    .calendar-day {
+        font-size: 0.7rem;
+    }
+
+    .calendar-day-number {
+        font-size: 0.8rem;
+    }
+
+    .calendar-day-count {
+        font-size: 0.6rem;
+    }
+
+    .participants-section h3 {
+        font-size: 1.2rem;
+        margin-bottom: 16px;
+    }
+
+    .participants-list {
+        padding: 16px;
+        min-height: 80px;
+    }
+
+    .participant-item {
+        padding: 8px 10px;
+        font-size: 0.9rem;
+        gap: 8px;
+    }
+
+    .participant-item::before {
+        font-size: 1rem;
+    }
+
+    .footer {
+        padding: 24px 16px;
+        margin-top: 40px;
+    }
+
+    .footer p:first-child {
+        font-size: 0.95rem;
+    }
+
+    .footer-text {
+        font-size: 0.8rem;
+    }
+}
+

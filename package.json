@@ -1,0 +1,26 @@
+{
+  "name": "escala-oracao",
+  "version": "1.0.0",
+  "description": "Escala de Oração - Escola Cristã Clássica. A modern, fluid, and fast website for an anonymous, open, and spontaneous daily prayer schedule.",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx http-server -p 8080 -c-1",
+    "build": "echo 'This is a static site, no build needed.'"
+  },
+  "keywords": [
+    "prayer",
+    "schedule",
+    "christian",
+    "community",
+    "spiritual",
+    "interactive",
+    "calendar"
+  ],
+  "author": "Escola Cristã Clássica",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/escala-oracao"
+  }
+}
+

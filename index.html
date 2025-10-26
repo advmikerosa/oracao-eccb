@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Escala de Oração - Escola Cristã Clássica. Participe de uma escala diária de oração aberta, anônima e espontânea.">
+    <meta name="theme-color" content="#1e3a5f">
+    <title>Escala de Oração - Escola Cristã Clássica</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="background-decoration"></div>
+    
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="title">Escala de Oração</h1>
+                <p class="subtitle">Escola Cristã Clássica</p>
+            </div>
+        </header>
+
+        <!-- Introduction Section -->
+        <section class="intro-section">
+            <div class="intro-content">
+                <h2>Participe da Nossa Escala de Oração</h2>
+                <p>
+                    Convidamos você a se unir em oração pelo futuro e desenvolvimento da Escola Cristã Clássica. 
+                    Esta é uma escala <strong>aberta, anônima e espontânea</strong> onde qualquer pessoa pode dedicar 
+                    5 minutos de oração pelo projeto.
+                </p>
+                <p>
+                    Sua participação é um ato de fé e comunhão. Não é necessário login — apenas digite seu nome ou apelido 
+                    e registre sua oração. Juntos, formamos uma corrente de intercessão pelo crescimento espiritual e 
+                    educacional da nossa comunidade.
+                </p>
+                <div class="divider"></div>
+            </div>
+        </section>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Prayer Input Section -->
+            <section class="prayer-input-section">
+                <div class="input-card">
+                    <h3>Registre Sua Oração Hoje</h3>
+                    <p class="input-subtitle">Dedique 5 minutos de oração pelo projeto</p>
+                    
+                    <form id="prayerForm" class="prayer-form">
+                        <div class="form-group">
+                            <input 
+                                type="text" 
+                                id="nameInput" 
+                                placeholder="Seu nome ou apelido" 
+                                maxlength="50"
+                                required
+                            >
+                        </div>
+                        <button type="submit" class="btn-submit">Confirmar Oração</button>
+                    </form>
+                    
+                    <div id="successMessage" class="success-message hidden">
+                        <div class="success-icon">✓</div>
+                        <p>Obrigado por se unir em oração!</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Stats Section -->
+            <section class="stats-section">
+                <div class="stat-card">
+                    <div class="stat-value" id="dailyMinutes">0</div>
+                    <div class="stat-label">Minutos Hoje</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="weeklyMinutes">0</div>
+                    <div class="stat-label">Minutos Esta Semana</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="dailyCount">0</div>
+                    <div class="stat-label">Participantes Hoje</div>
+                </div>
+            </section>
+
+            <!-- Calendar Section -->
+            <section class="calendar-section">
+                <h3>Calendário de Oração</h3>
+                <div class="calendar-controls">
+                    <button id="prevMonth" class="btn-nav">← Anterior</button>
+                    <h4 id="monthYear" class="month-year"></h4>
+                    <button id="nextMonth" class="btn-nav">Próximo →</button>
+                </div>
+                <div id="calendar" class="calendar-grid"></div>
+            </section>
+
+            <!-- Daily Participants Section -->
+            <section class="participants-section">
+                <h3>Quem Orou Hoje?</h3>
+                <div id="participantsList" class="participants-list">
+                    <p class="empty-state">Nenhuma oração registrada ainda. Seja o primeiro!</p>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Escala de Oração — Escola Cristã Clássica</p>
+            <p class="footer-text">Uma iniciativa de comunhão e intercessão</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+
