@@ -1,6 +1,6 @@
 body {
   font-family: 'Georgia', 'Times New Roman', serif;
-  background: #f8f8ef;
+  background: linear-gradient(135deg, #f9f7f1 0%, #ece8d9 100%);
   color: #2d2d2d;
   margin: 0;
   padding: 0;
@@ -10,25 +10,39 @@ body {
   text-align: center;
   font-size: 2.5em;
   font-weight: bold;
-  margin-bottom: 0.2em;
   color: #283593;
-  text-shadow: 1px 1px 0 #fff3e0;
+  margin-bottom: 0.2em;
+  text-shadow: 1px 1px 0 #e7dcc4, 0 4px 16px #c1b08033;
+}
+
+.header-classic h2 {
+  font-size: 1.2em;
+  color: #bfa04b;
+  font-weight: normal;
+  margin-top: 0.4em;
 }
 
 .hr-classic {
   border: none;
   border-top: 2px solid #bfa04b;
   width: 40%;
-  margin: 0 auto 2em auto;
+  margin: 1em auto 2em auto;
+}
+
+.intro-classic {
+  text-align: center;
+  font-size: 1.15em;
+  margin-bottom: 2em;
+  color: #585858;
 }
 
 .form-classic {
-  background: #fff;
+  background: #fffbea;
   border: 1px solid #c7b67a;
   border-radius: 12px;
   padding: 2em 2em 1em 2em;
-  box-shadow: 0 2px 8px #00000011;
-  max-width: 400px;
+  box-shadow: 0 2px 12px #bfa04b22;
+  max-width: 450px;
   margin: 2em auto;
 }
 
@@ -38,21 +52,52 @@ input, button {
   margin-bottom: 1em;
   border: 1px solid #bfa04b;
   border-radius: 6px;
-  background: #fbf8f0;
+  background: #fff8e1;
   color: #333;
+  font-size: 1em;
+  outline: none;
+  transition: border-color 0.2s;
+}
+input:focus {
+  border-color: #283593;
 }
 
 button {
   background: #283593;
   color: #fff;
-  border: 1px solid #bfa04b;
   font-weight: bold;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background 0.3s, color 0.2s;
 }
 button:hover {
   background: #bfa04b;
   color: #283593;
+}
+
+.status-classic {
+  background: #f4eed0;
+  border: 1px solid #d3b475;
+  border-radius: 10px;
+  margin: 2em auto 1.5em auto;
+  padding: 1.2em;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 2px 8px #d3b47522;
+}
+.status-classic strong {
+  color: #bfa04b;
+  font-size: 1.1em;
+}
+
+.list-classic {
+  margin: 2em auto;
+  max-width: 400px;
+}
+.list-classic h3 {
+  text-align: center;
+  color: #283593;
+  font-size: 1.2em;
+  margin-bottom: 0.7em;
 }
 
 .empty-state {
@@ -63,19 +108,23 @@ button:hover {
 }
 
 .participant-item {
-  background: #f4eed8;
+  background: #fcf9ec;
   border: 1px solid #bfa04b;
-  padding: 0.6em;
-  margin-bottom: 0.5em;
-  border-radius: 5px;
-  font-size: 1.15em;
+  padding: 0.7em 1em;
+  margin-bottom: 0.7em;
+  border-radius: 6px;
+  font-size: 1.08em;
+  color: #283593;
+  box-shadow: 0 1px 5px #bfa04b25;
 }
 
 .footer-classic {
   text-align: center;
-  font-size: 0.97em;
+  font-size: 1em;
   color: #5c5c5c;
-  padding: 1.3em 0 0.5em 0;
+  padding: 1.5em 0 1em 0;
   border-top: 1px solid #d3b475;
   margin-top: 2em;
+  background: #fcf6df;
+  letter-spacing: 0.07em;
 }
