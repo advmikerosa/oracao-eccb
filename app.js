@@ -7,6 +7,29 @@ const supabaseUrl = 'https://illgbfpmtcxiszihuyfh.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsbGdiZnBtdGN4aXN6aWh1eWZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1NzM4MTUsImV4cCI6MjA3NzE0OTgxNX0.lKoU_mX_5q7dWEFi3wi7-eRC-rhmfe4tuIkJTbbSHhM';
 const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
+import supabase from "./src/supabaseClient.js";
+
+async function registrarOracao() {
+  const nome = document.getElementById("nameInput").value;
+  const responsavel = "Web Anônimo";
+  const hoje = new Date();
+
+  const { error } = await supabase.from("escala_oracao").insert([{
+    nome,
+    data: hoje.toISOString().substring(0, 10),
+    hora: hoje.toTimeString().substring(0, 8),
+    responsavel,
+    observacoes: ""
+  }]);
+
+  if (error) {
+    alert("Erro ao registrar: " + error.message);
+  } else {
+    alert("Oração registrada com sucesso!");
+    atualizarOracoes();
+  }
+}
+
 // DataManager via Supabase
 const DataManager = {
   // Adiciona uma oração no banco
