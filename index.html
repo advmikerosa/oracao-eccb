@@ -49,7 +49,7 @@
                     <h3>Registre Sua Oração Hoje</h3>
                     <p class="input-subtitle">Dedique 5 minutos de oração pelo projeto</p>
                     
-                    <form id="prayerForm" class="prayer-form">
+                    <form id="prayerForm" class="prayer-form" onsubmit="return false;">
                         <div class="form-group">
                             <input 
                                 type="text" 
@@ -59,7 +59,7 @@
                                 required
                             >
                         </div>
-                        <button onclick="registrarOracao()">Registrar Oração</button>
+                        <button type="button" onclick="registrarOracao()">Registrar Oração</button>
                     </form>
                     
                     <div id="successMessage" class="success-message hidden">
@@ -72,7 +72,7 @@
             <!-- Stats Section -->
             <section class="stats-section">
                 <div class="stat-card">
-                    <div class="stat-value" id="dailyMinutes">0</div>
+                    <div class="stat-value" id="minutosHoje">0</div>
                     <div class="stat-label">Minutos Hoje</div>
                 </div>
                 <div class="stat-card">
@@ -80,7 +80,7 @@
                     <div class="stat-label">Minutos Esta Semana</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value" id="dailyCount">0</div>
+                    <div class="stat-value" id="participantesHoje">0</div>
                     <div class="stat-label">Participantes Hoje</div>
                 </div>
             </section>
@@ -99,7 +99,7 @@
             <!-- Daily Participants Section -->
             <section class="participants-section">
                 <h3>Quem Orou Hoje?</h3>
-                <div id="participantsList" class="participants-list">
+                <div id="listaOradores" class="participants-list">
                     <p class="empty-state">Nenhuma oração registrada ainda. Seja o primeiro!</p>
                 </div>
             </section>
@@ -111,8 +111,111 @@
             <p class="footer-text">Uma iniciativa de comunhão e intercessão</p>
         </footer>
     </div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/supabase.min.js"></script>
+
+    <!-- Supabase Integration -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/supabase.min.js"></script>
+    <script src="supabaseClient.js"></script>
     <script src="app.js"></script>
+    
+    <script>
+        // Integração Supabase
+        const SUPABASE_URL = 'https://your-project.supabase.co';
+        const SUPABASE_ANON_KEY = 'your-anon-key-here';
+        
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // Função para registrar oração
+        async function registrarOracao() {
+            const nameInput = document.getElementById('nameInput');
+            const name = nameInput.value.trim();
+            
+            if (!name) {
+                alert('Por favor, digite seu nome ou apelido.');
+                return;
+            }
+            
+            try {
+                const { data, error } = await supabaseClient
+                    .from('oracoes')
+                    .insert([
+                        {
+                            nome: name,
+                            data: new Date().toISOString(),
+                            minutos: 5
+                        }
+                    ]);
+                
+                if (error) throw error;
+                
+                // Mostrar mensagem de sucesso
+                document.getElementById('successMessage').classList.remove('hidden');
+                nameInput.value = '';
+                
+                // Ocultar mensagem após 3 segundos
+                setTimeout(() => {
+                    document.getElementById('successMessage').classList.add('hidden');
+                }, 3000);
+                
+                // Atualizar visualizações
+                await atualizarOracoes();
+                
+            } catch (error) {
+                console.error('Erro ao registrar oração:', error);
+                alert('Erro ao registrar oração. Tente novamente.');
+            }
+        }
+        
+        // Função para atualizar orações
+        async function atualizarOracoes() {
+            try {
+                const hoje = new Date();
+                hoje.setHours(0, 0, 0, 0);
+                const inicioSemana = new Date(hoje);
+                inicioSemana.setDate(hoje.getDate() - hoje.getDay());
+                
+                // Buscar orações de hoje
+                const { data: oracoesHoje, error: errorHoje } = await supabaseClient
+                    .from('oracoes')
+                    .select('*')
+                    .gte('data', hoje.toISOString());
+                
+                if (errorHoje) throw errorHoje;
+                
+                // Buscar orações da semana
+                const { data: oracoesSemana, error: errorSemana } = await supabaseClient
+                    .from('oracoes')
+                    .select('*')
+                    .gte('data', inicioSemana.toISOString());
+                
+                if (errorSemana) throw errorSemana;
+                
+                // Atualizar contadores
+                const minutosHoje = oracoesHoje.reduce((sum, o) => sum + (o.minutos || 5), 0);
+                const minutosSemana = oracoesSemana.reduce((sum, o) => sum + (o.minutos || 5), 0);
+                const participantesHoje = oracoesHoje.length;
+                
+                document.getElementById('minutosHoje').textContent = minutosHoje;
+                document.getElementById('weeklyMinutes').textContent = minutosSemana;
+                document.getElementById('participantesHoje').textContent = participantesHoje;
+                
+                // Atualizar lista de oradores
+                const listaOradores = document.getElementById('listaOradores');
+                if (oracoesHoje.length === 0) {
+                    listaOradores.innerHTML = '<p class="empty-state">Nenhuma oração registrada ainda. Seja o primeiro!</p>';
+                } else {
+                    listaOradores.innerHTML = oracoesHoje
+                        .map(oracao => `<div class="participant-item">${oracao.nome}</div>`)
+                        .join('');
+                }
+                
+            } catch (error) {
+                console.error('Erro ao atualizar orações:', error);
+            }
+        }
+        
+        // Carregar orações ao iniciar
+        document.addEventListener('DOMContentLoaded', atualizarOracoes);
+    </script>
 </body>
 </html>
-
