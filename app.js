@@ -1,20 +1,65 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
 // Supabase client
 const supabase = createClient(
   'https://illgbfpmtcxiszihuyfh.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsbGdiZnBtdGN4aXN6aWh1eWZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1NzM4MTUsImV4cCI6MjA3NzE0OTgxNX0.lKoU_mX_5q7dWEFi3wi7-eRC-rhmfe4tuIkJTbbSHhM'
 );
-
 // State
 let currentMonth = new Date();
 let selectedDate = null;
 let weekdaySelected = null; // 0-6 Sunday-Saturday
 const WEEKDAY_LABELS = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
-
 // Helpers
 function toDateStr(d) { return d.toISOString().slice(0,10); }
 function minutesToHuman(min) { return min >= 60 ? `${Math.floor(min/60)}h ${min%60}min` : `${min} min`; }
+
+// Buscar orações (global)
+let allPrayers = [];
+async function atualizarOracoes() {
+  const { data, error } = await supabase.from('escala_oracao').select('*').order('data', { ascending: false }).order('hora', { ascending: false });
+  if (error) { console.error(error); return; }
+  allPrayers = data || [];
+}
+
+// Painel diário (home)
+function atualizarPainelDiario() {
+  try {
+    const todayStr = toDateStr(new Date());
+    const hoje = allPrayers.filter(p => p.data === todayStr);
+    // métricas
+    const minutosHojeEl = document.getElementById('minutosHoje');
+    const participantesHojeEl = document.getElementById('participantesHoje');
+    const weeklyMinutesEl = document.getElementById('weeklyMinutes');
+    const listaEl = document.getElementById('listaOradores');
+    if (minutosHojeEl) minutosHojeEl.textContent = minutesToHuman(hoje.length * 5);
+    if (participantesHojeEl) participantesHojeEl.textContent = String(hoje.length);
+    if (listaEl) {
+      if (hoje.length === 0) {
+        listaEl.innerHTML = '<li class="text-gray-500 italic">Ninguém orou registrado ainda hoje.</li>';
+      } else {
+        // ordenar por hora asc
+        const ordenado = [...hoje].sort((a,b) => a.hora.localeCompare(b.hora));
+        listaEl.innerHTML = ordenado.map(p => `<li class="flex justify-between"><span class="font-medium text-teal-900">${p.nome}</span><span class="text-sm text-teal-700">${p.hora}</span></li>`).join('');
+      }
+    }
+    // minutos na semana corrente (seg a dom)
+    if (weeklyMinutesEl) {
+      const now = new Date();
+      const start = new Date(now);
+      const day = (now.getDay()+6)%7; // seg=0..dom=6
+      start.setDate(now.getDate() - day);
+      start.setHours(0,0,0,0);
+      const end = new Date(start); end.setDate(start.getDate()+6);
+      const inWeek = allPrayers.filter(p => {
+        const d = new Date(p.data+ 'T00:00:00');
+        return d >= start && d <= end;
+      });
+      weeklyMinutesEl.textContent = minutesToHuman(inWeek.length * 5);
+    }
+  } catch(e) {
+    console.warn('Falha ao atualizar painel diário', e);
+  }
+}
 
 // Registrar oração rápida (5 min)
 async function registrarOracao(event) {
@@ -29,6 +74,7 @@ async function registrarOracao(event) {
   if (error) { alert('Erro ao registrar oração! Tente novamente.'); return; }
   nameInput.value = '';
   await atualizarOracoes();
+  atualizarPainelDiario();
   await renderCalendar();
   if (weekdaySelected !== null) await renderWeekdaySummary(weekdaySelected); // keep weekday panel updated
 }
@@ -49,16 +95,9 @@ async function scheduleNewPrayer(event) {
   if (error) { alert('Erro ao agendar oração!'); return; }
   form.reset();
   await atualizarOracoes();
+  atualizarPainelDiario();
   await renderCalendar();
   if (weekdaySelected !== null) await renderWeekdaySummary(weekdaySelected);
-}
-
-// Buscar orações (global)
-let allPrayers = [];
-async function atualizarOracoes() {
-  const { data, error } = await supabase.from('escala_oracao').select('*').order('data', { ascending: false }).order('hora', { ascending: false });
-  if (error) { console.error(error); return; }
-  allPrayers = data || [];
 }
 
 // Render calendário
@@ -74,7 +113,7 @@ async function renderCalendar() {
   calendarGrid.innerHTML = '';
   const counts = {};
   allPrayers.forEach(p => { counts[p.data] = (counts[p.data] || 0) + 1; });
-  for (let i = 0; i < firstDayWeek; i++) calendarGrid.innerHTML += '<div></div>';
+  for (let i = 0; i < firstDayWeek; i++) calendarGrid.innerHTML += '';
   for (let day = 1; day <= daysInMonth; day++) {
     const d = new Date(year, month, day);
     const dStr = toDateStr(d);
@@ -116,8 +155,8 @@ async function selectDate(date) {
           ${p.observacoes ? `<div class="text-gray-600 text-sm italic">${p.observacoes}</div>` : ''}
         </div>
         <div class="text-right text-sm text-teal-700">
-          <div>${p.hora}</div>
-          <div>${p.responsavel}</div>
+          ${p.hora}
+          ${p.responsavel}
         </div>
       </div>`).join('');
   }
@@ -189,8 +228,9 @@ function wireEvents() {
 }
 
 // Init
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   wireEvents();
-  atualizarOracoes();
+  await atualizarOracoes();
+  atualizarPainelDiario();
   renderCalendar();
 });
