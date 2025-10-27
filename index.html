@@ -92,7 +92,7 @@
                 <!-- Participants List -->
                 <div class="participants-section">
                     <h4>Quem Já Orou Hoje</h4>
-                    <div class="participants-list" id="listaOradores">
+                    <div id="listaOradores" class="participants-list">
                         <p class="empty-state">Nenhuma oração registrada ainda. Seja o primeiro!</p>
                     </div>
                 </div>
@@ -122,12 +122,14 @@
             try {
                 // Inserir oração no Supabase
                 const { data, error } = await supabaseClient
-                    .from('oracoes')
+                    .from('escala_oracao')
                     .insert([
                         { 
                             nome: name,
-                            data: new Date().toISOString(),
-                            minutos: 5
+                            data: new Date().toISOString().substring(0, 10),
+                            hora: new Date().toTimeString().substring(0, 8),
+                            responsavel: name,
+                            observacoes: ''
                         }
                     ]);
                 
@@ -155,24 +157,24 @@
                 
                 // Buscar orações de hoje
                 const { data: oracoesHoje, error: errorHoje } = await supabaseClient
-                    .from('oracoes')
+                    .from('escala_oracao')
                     .select('*')
-                    .gte('data', hoje.toISOString());
+                    .gte('data', hoje.toISOString().substring(0, 10));
                 
                 if (errorHoje) throw errorHoje;
                 
                 // Buscar orações da semana
                 const { data: oracoesSemana, error: errorSemana } = await supabaseClient
-                    .from('oracoes')
+                    .from('escala_oracao')
                     .select('*')
-                    .gte('data', inicioSemana.toISOString());
+                    .gte('data', inicioSemana.toISOString().substring(0, 10));
                 
                 if (errorSemana) throw errorSemana;
                 
-                // Atualizar contadores
-                const minutosHoje = oracoesHoje.reduce((sum, o) => sum + (o.minutos || 5), 0);
-                const minutosSemana = oracoesSemana.reduce((sum, o) => sum + (o.minutos || 5), 0);
-                const participantesHoje = oracoesHoje.length;
+                // Atualizar contadores (cada oração = 5 minutos)
+                const minutosHoje = (oracoesHoje || []).length * 5;
+                const minutosSemana = (oracoesSemana || []).length * 5;
+                const participantesHoje = (oracoesHoje || []).length;
                 
                 document.getElementById('minutosHoje').textContent = minutosHoje;
                 document.getElementById('weeklyMinutes').textContent = minutosSemana;
@@ -180,7 +182,7 @@
                 
                 // Atualizar lista de oradores
                 const listaOradores = document.getElementById('listaOradores');
-                if (oracoesHoje.length === 0) {
+                if (!oracoesHoje || oracoesHoje.length === 0) {
                     listaOradores.innerHTML = '<p class="empty-state">Nenhuma oração registrada ainda. Seja o primeiro!</p>';
                 } else {
                     listaOradores.innerHTML = oracoesHoje
