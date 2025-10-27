@@ -3,6 +3,9 @@
 // ============================================
 
 // Data Management
+const supabaseUrl = 'https://illgbfpmtcxiszihuyfh.supabase.co';
+const supabaseKey = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsbGdiZnBtdGN4aXN6aWh1eWZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1NzM4MTUsImV4cCI6MjA3NzE0OTgxNX0.lKoU_mX_5q7dWEFi3wi7-eRC-rhmfe4tuIkJTbbSHhM; // Pegue na dashboard do projeto
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 const DataManager = {
     STORAGE_KEY: 'escala_oracao_data',
     
@@ -14,7 +17,19 @@ const DataManager = {
     
     // Save data to localStorage
     saveData(data) {
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
+        async function addPrayer(date, name) {
+    const { data, error } = await supabase
+      .from('escala_oracao')
+      .insert([{
+        nome: name,
+        data: date.toISOString().slice(0,10),
+        hora: date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+        responsavel: name,
+        observacoes: ''
+      }]);
+    return { data, error };
+}
+
     },
     
     // Add a prayer entry for a specific date
@@ -37,9 +52,15 @@ const DataManager = {
     
     // Get prayers for a specific date
     getPrayersForDate(date) {
-        const data = this.getData();
-        const dateStr = this.formatDate(date);
-        return data[dateStr] || [];
+        async function getPrayersForDate(date) {
+    const dateStr = date.toISOString().slice(0,10);
+    let { data, error } = await supabase
+       .from('escala_oracao')
+       .select('*')
+       .eq('data', dateStr);
+    return data || [];
+}
+
     },
     
     // Format date as YYYY-MM-DD
@@ -52,13 +73,21 @@ const DataManager = {
     
     // Get all dates with prayers in a month
     getDatesWithPrayersInMonth(year, month) {
-        const data = this.getData();
-        const dates = [];
-        
-        for (const dateStr in data) {
-            const [y, m, d] = dateStr.split('-');
-            if (parseInt(y) === year && parseInt(m) === month + 1) {
-                dates.push(parseInt(d));
+        async function getDatesWithPrayersInMonth(year, month) {
+    const startDate = `${year}-${String(month+1).padStart(2,'0')}-01`;
+    const endDate = `${year}-${String(month+1).padStart(2,'0')}-31`;
+
+    let { data, error } = await supabase
+        .from('escala_oracao')
+        .select('data')
+        .gte('data', startDate)
+        .lte('data', endDate);
+
+    // extrai dias
+    const dias = (data || []).map(row => parseInt(row.data.split('-')[2]));
+    return dias;
+}
+
             }
         }
         
