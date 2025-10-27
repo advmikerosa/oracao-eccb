@@ -4,119 +4,76 @@
 
 // Data Management
 const supabaseUrl = 'https://illgbfpmtcxiszihuyfh.supabase.co';
-const supabaseKey = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsbGdiZnBtdGN4aXN6aWh1eWZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1NzM4MTUsImV4cCI6MjA3NzE0OTgxNX0.lKoU_mX_5q7dWEFi3wi7-eRC-rhmfe4tuIkJTbbSHhM; // Pegue na dashboard do projeto
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsbGdiZnBtdGN4aXN6aWh1eWZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1NzM4MTUsImV4cCI6MjA3NzE0OTgxNX0.lKoU_mX_5q7dWEFi3wi7-eRC-rhmfe4tuIkJTbbSHhM';
 const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+// DataManager via Supabase
 const DataManager = {
-    STORAGE_KEY: 'escala_oracao_data',
-    
-    // Initialize or retrieve data
-    getData() {
-        const stored = localStorage.getItem(this.STORAGE_KEY);
-        return stored ? JSON.parse(stored) : {};
-    },
-    
-    // Save data to localStorage
-    saveData(data) {
-        async function addPrayer(date, name) {
+  // Adiciona uma oração no banco
+  async addPrayer(date, name) {
     const { data, error } = await supabase
       .from('escala_oracao')
       .insert([{
-        nome: name,
+        nome: name.trim(),
         data: date.toISOString().slice(0,10),
         hora: date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-        responsavel: name,
+        responsavel: name.trim(),
         observacoes: ''
       }]);
     return { data, error };
-}
+  },
 
-    },
-    
-    // Add a prayer entry for a specific date
-    addPrayer(date, name) {
-        const data = this.getData();
-        const dateStr = this.formatDate(date);
-        
-        if (!data[dateStr]) {
-            data[dateStr] = [];
-        }
-        
-        data[dateStr].push({
-            name: name.trim(),
-            timestamp: new Date().toISOString()
-        });
-        
-        this.saveData(data);
-        return data;
-    },
-    
-    // Get prayers for a specific date
-    getPrayersForDate(date) {
-        async function getPrayersForDate(date) {
+  // Busca orações de um dia
+  async getPrayersForDate(date) {
     const dateStr = date.toISOString().slice(0,10);
     let { data, error } = await supabase
-       .from('escala_oracao')
-       .select('*')
-       .eq('data', dateStr);
-    return data || [];
-}
+      .from('escala_oracao')
+      .select('*')
+      .eq('data', dateStr);
+    // Adapta para ["name"]
+    return (data || []).map(item => ({ name: item.nome }));
+  },
 
-    },
-    
-    // Format date as YYYY-MM-DD
-    formatDate(date) {
-        const d = new Date(date);
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        return `${d.getFullYear()}-${month}-${day}`;
-    },
-    
-    // Get all dates with prayers in a month
-    getDatesWithPrayersInMonth(year, month) {
-        async function getDatesWithPrayersInMonth(year, month) {
+  // Busca os dias do mês que têm oração
+  async getDatesWithPrayersInMonth(year, month) {
     const startDate = `${year}-${String(month+1).padStart(2,'0')}-01`;
     const endDate = `${year}-${String(month+1).padStart(2,'0')}-31`;
-
     let { data, error } = await supabase
-        .from('escala_oracao')
-        .select('data')
-        .gte('data', startDate)
-        .lte('data', endDate);
+      .from('escala_oracao')
+      .select('data')
+      .gte('data', startDate)
+      .lte('data', endDate);
+    // Retorna dias [1, 8, 15...]
+    return (data || []).map(row => parseInt(row.data.split('-')[2]));
+  },
 
-    // extrai dias
-    const dias = (data || []).map(row => parseInt(row.data.split('-')[2]));
-    return dias;
-}
+  formatDate(date) {
+    const d = new Date(date);
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${d.getFullYear()}-${month}-${day}`;
+  },
 
-            }
-        }
-        
-        return dates;
-    },
-    
-    // Get total minutes for today
-    getTodayMinutes() {
-        const today = new Date();
-        const prayers = this.getPrayersForDate(today);
-        return prayers.length * 5; // 5 minutes per prayer
-    },
-    
-    // Get total minutes for this week
-    getWeeklyMinutes() {
-        const today = new Date();
-        const startOfWeek = new Date(today);
-        startOfWeek.setDate(today.getDate() - today.getDay());
-        
-        let total = 0;
-        for (let i = 0; i < 7; i++) {
-            const date = new Date(startOfWeek);
-            date.setDate(startOfWeek.getDate() + i);
-            const prayers = this.getPrayersForDate(date);
-            total += prayers.length * 5;
-        }
-        
-        return total;
+  // Total minutos de hoje
+  async getTodayMinutes() {
+    const prayers = await this.getPrayersForDate(new Date());
+    return prayers.length * 5;
+  },
+
+  // Total minutos da semana
+  async getWeeklyMinutes() {
+    const today = new Date();
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay());
+    let total = 0;
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(startOfWeek);
+      date.setDate(startOfWeek.getDate() + i);
+      const prayers = await this.getPrayersForDate(date);
+      total += prayers.length * 5;
     }
+    return total;
+  }
 };
 
 // Calendar Manager
