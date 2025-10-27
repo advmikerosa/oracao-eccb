@@ -16,7 +16,7 @@
     </header>
     <section class="text-center text-lg text-amber-900">
       <p>
-        Dedique <span class="font-bold text-amber-600">5 minutos</span> de oração pelo projeto.<br>
+        Dedique <span class="font-bold text-amber-600">5 minutos</span> de oração pelo projeto.<br/>
         Basta digitar seu nome ou apelido e registrar abaixo.
       </p>
     </section>
@@ -49,11 +49,86 @@
         <p class="italic text-amber-400 text-base empty-state">Nenhuma oração registrada ainda. Seja o primeiro!</p>
       </div>
     </section>
+
+    <!-- Calendário de Orações -->
+    <section class="mt-6 animate-fadeIn" id="calendarioSection">
+      <h3 class="text-center text-xl font-semibold text-amber-700 mb-4">Calendário de Orações</h3>
+      
+      <!-- Navegação do Calendário -->
+      <div class="flex justify-between items-center mb-4">
+        <button id="prevMonth" class="px-3 py-1 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition">
+          ← Anterior
+        </button>
+        <h4 id="currentMonth" class="text-lg font-semibold text-teal-900"></h4>
+        <button id="nextMonth" class="px-3 py-1 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition">
+          Próximo →
+        </button>
+      </div>
+
+      <!-- Grid do Calendário -->
+      <div class="bg-amber-50 rounded-xl border border-amber-200 p-4">
+        <div class="grid grid-cols-7 gap-2 mb-2 text-center text-sm font-semibold text-amber-700">
+          <div>Dom</div>
+          <div>Seg</div>
+          <div>Ter</div>
+          <div>Qua</div>
+          <div>Qui</div>
+          <div>Sex</div>
+          <div>Sáb</div>
+        </div>
+        <div id="calendarGrid" class="grid grid-cols-7 gap-2">
+          <!-- Days will be populated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Detalhes do Dia Selecionado -->
+      <div id="dayDetails" class="mt-4 hidden">
+        <div class="bg-teal-50 rounded-xl border border-teal-200 p-4">
+          <h4 class="text-lg font-semibold text-teal-900 mb-3" id="selectedDate"></h4>
+          <div class="flex gap-4 mb-4">
+            <div class="flex-1 text-center">
+              <p class="text-sm text-teal-700">Orações</p>
+              <p class="text-2xl font-bold text-teal-900" id="dayPrayerCount">0</p>
+            </div>
+            <div class="flex-1 text-center">
+              <p class="text-sm text-teal-700">Tempo Total</p>
+              <p class="text-2xl font-bold text-teal-900" id="dayTotalMinutes">0 min</p>
+            </div>
+          </div>
+          
+          <!-- Agendar Nova Oração -->
+          <div class="border-t border-teal-300 pt-4">
+            <h5 class="text-md font-semibold text-teal-800 mb-2">Agendar Oração</h5>
+            <form id="scheduleForm" class="flex flex-col gap-3">
+              <input type="time" id="scheduleTime" 
+                class="px-3 py-2 rounded-lg border border-teal-400 bg-white focus:ring-2 focus:ring-teal-400 outline-none" 
+                required>
+              <input type="text" id="scheduleName" 
+                class="px-3 py-2 rounded-lg border border-teal-400 bg-white focus:ring-2 focus:ring-teal-400 outline-none" 
+                placeholder="Seu nome" maxlength="50" required>
+              <button type="submit" 
+                class="bg-teal-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-teal-700 transition">
+                Agendar Oração
+              </button>
+            </form>
+          </div>
+
+          <!-- Lista de Orações Agendadas -->
+          <div id="scheduledPrayers" class="mt-4 border-t border-teal-300 pt-4">
+            <h5 class="text-md font-semibold text-teal-800 mb-2">Orações Agendadas</h5>
+            <div id="scheduledList" class="flex flex-col gap-2">
+              <!-- Scheduled prayers will appear here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <footer class="mt-6 pt-3 border-t border-amber-200 text-center text-amber-600 text-sm select-none">
-      &copy; 2025 Escola Cristã Clássica • Inspirado na tradição e beleza clássica
+      © 2025 Escola Cristã Clássica • Inspirado na tradição e beleza clássica
     </footer>
   </main>
-  <script type="module" src="app.js"></script>
+  <script src="app.js" type="module"></script>
   <style>
     @keyframes fadeInDown {
       from { opacity:0; transform: translateY(-30px);}
