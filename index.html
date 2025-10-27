@@ -1,201 +1,221 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>Escala de Oração • Escola Cristã Clássica</title>
-  <!-- Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gradient-to-br from-yellow-50 via-teal-50 to-amber-100 min-h-screen flex items-center justify-center antialiased">
-  <main class="w-full max-w-xl mx-auto bg-white/80 rounded-3xl shadow-xl border border-amber-100 p-6 flex flex-col gap-6 mt-8 mb-8">
-    <header class="text-center space-y-2 animate-fadeInDown">
-      <h1 class="text-3xl md:text-4xl font-bold text-teal-900 drop-shadow tracking-tight">Escala de Oração</h1>
-      <h2 class="text-xl md:text-2xl text-amber-600 mb-2">Escola Cristã Clássica</h2>
-      <div class="w-1/5 mx-auto border-t-2 border-amber-500 mb-2"></div>
-    </header>
-    <section class="text-center text-lg text-amber-900">
-      <p>
-        Dedique <span class="font-bold text-amber-600">5 minutos</span> de oração pelo projeto.<br/>
-        Basta digitar seu nome ou apelido e registrar abaixo.
-      </p>
-    </section>
-    <form id="formOracao" class="w-full flex flex-col md:flex-row gap-4 justify-center items-center animate-fadeIn">
-      <input type="text" id="nameInput"
-        class="flex-1 px-4 py-2 rounded-lg border border-amber-400 bg-yellow-50 focus:ring-2 focus:ring-amber-400 outline-none transition"
-        placeholder="Seu nome ou apelido" maxlength="50" required autocomplete="off">
-      <button type="submit"
-        class="bg-amber-600 text-white px-6 py-2 rounded-lg font-semibold shadow-lg transition hover:bg-amber-700 hover:scale-105">
-        Registrar Oração
-      </button>
-    </form>
-    <section id="status" class="w-full flex flex-col md:flex-row gap-4 items-center justify-center mt-2 animate-fadeInUp">
-      <div class="flex-1 text-center px-4 py-3 bg-amber-50 rounded-xl border border-amber-200 shadow-sm">
-        <h3 class="text-lg font-semibold text-amber-700">Minutos hoje</h3>
-        <p class="text-2xl font-bold text-teal-900" id="minutosHoje">0</p>
-      </div>
-      <div class="flex-1 text-center px-4 py-3 bg-amber-50 rounded-xl border border-amber-200 shadow-sm">
-        <h3 class="text-lg font-semibold text-amber-700">Participantes hoje</h3>
-        <p class="text-2xl font-bold text-teal-900" id="participantesHoje">0</p>
-      </div>
-      <div class="flex-1 text-center px-4 py-3 bg-amber-50 rounded-xl border border-amber-200 shadow-sm">
-        <h3 class="text-lg font-semibold text-amber-700">Minutos semana</h3>
-        <p class="text-2xl font-bold text-teal-900" id="weeklyMinutes">0</p>
-      </div>
-    </section>
-    <section class="mt-6 animate-fadeIn">
-      <h3 class="text-center text-xl font-semibold text-amber-700 mb-2">Quem já orou hoje</h3>
-      <div id="listaOradores" class="flex flex-col gap-2 items-center min-h-[40px]">
-        <p class="italic text-amber-400 text-base empty-state">Nenhuma oração registrada ainda. Seja o primeiro!</p>
-      </div>
-    </section>
-    <!-- Calendário de Orações -->
-    <section id="calendarioSection" class="mt-6 animate-fadeIn">
-      <h3 class="text-center text-xl font-semibold text-amber-700 mb-4">Calendário de Orações</h3>
-      
-      <!-- Botão Ir para Hoje -->
-      <div class="flex justify-center mb-4">
-        <button id="goToToday" class="px-5 py-2 bg-teal-600 text-white rounded-lg font-semibold hover:bg-teal-700 transition shadow-lg hover:scale-105">
-          📅 Ir para Hoje
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Escala de Oração • Escola Cristã Clássica</title>
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gradient-to-br from-yellow-50 via-teal-50 to-amber-100 min-h-screen flex items-center justify-center antialiased">
+    <main class="w-full max-w-xl mx-auto bg-white/80 rounded-3xl shadow-xl border border-amber-100 p-6 flex flex-col gap-6 mt-8 mb-8">
+      <header class="text-center space-y-2 animate-fadeInDown">
+        <h1 class="text-3xl md:text-4xl font-bold text-teal-900 drop-shadow tracking-tight">Escala de Oração</h1>
+        <h2 class="text-xl md:text-2xl text-amber-600 mb-2">Escola Cristã Clássica</h2>
+        <div class="w-1/5 mx-auto border-t-2 border-amber-500 mb-2"></div>
+      </header>
+
+      <section class="text-center text-lg text-amber-900">
+        <p>
+          Dedique <span class="font-bold text-amber-600">5 minutos</span> de oração pelo projeto.<br />
+          Basta digitar seu nome ou apelido e registrar abaixo.
+        </p>
+      </section>
+
+      <form id="formOracao" class="w-full flex flex-col md:flex-row gap-4 justify-center items-center animate-fadeIn">
+        <input
+          type="text"
+          id="nameInput"
+          class="flex-1 px-4 py-2 rounded-lg border border-amber-400 bg-yellow-50 focus:ring-2 focus:ring-amber-400 outline-none transition"
+          placeholder="Seu nome ou apelido"
+          maxlength="50"
+          required
+          autocomplete="off"
+        />
+        <button type="submit" class="bg-amber-600 text-white px-6 py-2 rounded-lg font-semibold shadow-lg transition hover:bg-amber-700 hover:scale-105">
+          Registrar Oração
         </button>
-      </div>
-      
-      <!-- Barra de Seleção dos Dias da Semana -->
-      <div class="mb-4">
-        <div class="flex flex-wrap justify-center gap-2 p-3 bg-amber-50 rounded-xl border border-amber-200">
-          <button data-weekday="0" class="weekday-btn px-3 py-2 rounded-lg border-2 border-amber-300 bg-white hover:bg-amber-100 transition text-sm font-medium text-amber-800">
-            Dom
-          </button>
-          <button data-weekday="1" class="weekday-btn px-3 py-2 rounded-lg border-2 border-amber-300 bg-white hover:bg-amber-100 transition text-sm font-medium text-amber-800">
-            Seg
-          </button>
-          <button data-weekday="2" class="weekday-btn px-3 py-2 rounded-lg border-2 border-amber-300 bg-white hover:bg-amber-100 transition text-sm font-medium text-amber-800">
-            Ter
-          </button>
-          <button data-weekday="3" class="weekday-btn px-3 py-2 rounded-lg border-2 border-amber-300 bg-white hover:bg-amber-100 transition text-sm font-medium text-amber-800">
-            Qua
-          </button>
-          <button data-weekday="4" class="weekday-btn px-3 py-2 rounded-lg border-2 border-amber-300 bg-white hover:bg-amber-100 transition text-sm font-medium text-amber-800">
-            Qui
-          </button>
-          <button data-weekday="5" class="weekday-btn px-3 py-2 rounded-lg border-2 border-amber-300 bg-white hover:bg-amber-100 transition text-sm font-medium text-amber-800">
-            Sex
-          </button>
-          <button data-weekday="6" class="weekday-btn px-3 py-2 rounded-lg border-2 border-amber-300 bg-white hover:bg-amber-100 transition text-sm font-medium text-amber-800">
-            Sáb
-          </button>
+      </form>
+
+      <section id="status" class="w-full flex flex-col md:flex-row gap-4 items-center justify-center mt-2 animate-fadeInUp">
+        <div class="flex-1 text-center px-4 py-3 bg-amber-50 rounded-xl border border-amber-200 shadow-sm">
+          <h3 class="text-lg font-semibold text-amber-700">Minutos hoje</h3>
+          <p id="minutosHoje" class="text-2xl font-bold text-teal-900">0</p>
         </div>
-        <!-- Detalhes do Dia da Semana Selecionado -->
-        <div id="weekdayDetails" class="hidden mt-3 p-4 bg-teal-50 rounded-xl border border-teal-200">
-          <h4 class="text-lg font-semibold text-teal-900 mb-3" id="weekdayTitle"></h4>
-          <div id="weekdayStats" class="flex gap-4 mb-3">
-            <div class="flex-1 text-center">
-              <p class="text-sm text-teal-700">Total de Orações</p>
-              <p class="text-2xl font-bold text-teal-900" id="weekdayPrayerCount">0</p>
-            </div>
-            <div class="flex-1 text-center">
-              <p class="text-sm text-teal-700">Tempo Total</p>
-              <p class="text-2xl font-bold text-teal-900" id="weekdayTotalMinutes">0 min</p>
-            </div>
-          </div>
-          <div id="weekdayOccurrences" class="flex flex-col gap-2">
-            <!-- Occurrences will be populated by JavaScript -->
+        <div class="flex-1 text-center px-4 py-3 bg-amber-50 rounded-xl border border-amber-200 shadow-sm">
+          <h3 class="text-lg font-semibold text-amber-700">Participantes hoje</h3>
+          <p id="participantesHoje" class="text-2xl font-bold text-teal-900">0</p>
+        </div>
+        <div class="flex-1 text-center px-4 py-3 bg-amber-50 rounded-xl border border-amber-200 shadow-sm">
+          <h3 class="text-lg font-semibold text-amber-700">Minutos semana</h3>
+          <p id="weeklyMinutes" class="text-2xl font-bold text-teal-900">0</p>
+        </div>
+      </section>
+
+      <section class="mt-6 animate-fadeIn">
+        <h3 class="text-center text-xl font-semibold text-amber-700 mb-2">Quem já orou hoje</h3>
+        <!-- Mantemos o mesmo id do container -->
+        <div id="listaOradores" class="w-full">
+          <div class="overflow-hidden rounded-xl border border-amber-200 shadow-sm bg-white/60">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-amber-50/80 text-amber-800">
+                <tr>
+                  <th class="px-4 py-3 font-semibold">Nome</th>
+                  <th class="px-4 py-3 font-semibold">Horário da oração</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyOradores" class="divide-y divide-amber-100">
+                <!-- Linhas serão inseridas via JS -->
+              </tbody>
+            </table>
+            <div id="emptyState" class="p-4 text-center italic text-amber-400 text-base">Nenhuma oração registrada ainda. Seja o primeiro!</div>
           </div>
         </div>
-      </div>
-      
-      <!-- Navegação do Calendário -->
-      <div class="flex justify-between items-center mb-4">
-        <button id="prevMonth" class="px-3 py-1 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition">
-          ← Anterior
-        </button>
-        <h4 id="currentMonth" class="text-lg font-semibold text-teal-900"></h4>
-        <button id="nextMonth" class="px-3 py-1 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition">
-          Próximo →
-        </button>
-      </div>
-      <!-- Grid do Calendário -->
-      <div class="bg-amber-50 rounded-xl border border-amber-200 p-4">
-        <div class="grid grid-cols-7 gap-2 mb-2 text-center text-sm font-semibold text-amber-700">
-          <div>Dom</div>
-          <div>Seg</div>
-          <div>Ter</div>
-          <div>Qua</div>
-          <div>Qui</div>
-          <div>Sex</div>
-          <div>Sáb</div>
+      </section>
+
+      <!-- Calendário de Orações -->
+      <section id="calendarioSection" class="mt-6 animate-fadeIn">
+        <h3 class="text-center text-xl font-semibold text-amber-700 mb-4">Calendário de Orações</h3>
+
+        <!-- Botão Ir para Hoje -->
+        <div class="flex justify-center mb-4">
+          <button id="goToToday" class="px-5 py-2 bg-teal-600 text-white rounded-lg font-semibold hover:bg-teal-700 transition shadow-lg hover:scale-105">
+            📅 Ir para Hoje
+          </button>
         </div>
-        <div id="calendarGrid" class="grid grid-cols-7 gap-2">
-          <!-- Days will be populated by JavaScript -->
-        </div>
-      </div>
-      <!-- Detalhes do Dia Selecionado -->
-      <div id="dayDetails" class="mt-4 hidden">
-        <div class="bg-teal-50 rounded-xl border border-teal-200 p-4">
-          <h4 id="selectedDate" class="text-lg font-semibold text-teal-900 mb-3"></h4>
-          <div class="flex gap-4 mb-4">
-            <div class="flex-1 text-center">
-              <p class="text-sm text-teal-700">Orações</p>
-              <p id="dayPrayerCount" class="text-2xl font-bold text-teal-900">0</p>
-            </div>
-            <div class="flex-1 text-center">
-              <p class="text-sm text-teal-700">Tempo Total</p>
-              <p id="dayTotalMinutes" class="text-2xl font-bold text-teal-900">0 min</p>
-            </div>
+
+        <!-- Barra de Seleção dos Dias da Semana -->
+        <div class="mb-4">
+          <div class="flex flex-wrap justify-center gap-2 p-3 bg-amber-50 rounded-xl border border-amber-200">
+            <button class="weekday-btn px-3 py-2 rounded-lg border-2 border-amber-300 bg-white hover:bg-amber-100 transition text-sm font-medium text-amber-800" data-weekday="0">Dom</button>
+            <button class="weekday-btn px-3 py-2 rounded-lg border-2 border-amber-300 bg-white hover:bg-amber-100 transition text-sm font-medium text-amber-800" data-weekday="1">Seg</button>
+            <button class="weekday-btn px-3 py-2 rounded-lg border-2 border-amber-300 bg-white hover:bg-amber-100 transition text-sm font-medium text-amber-800" data-weekday="2">Ter</button>
+            <button class="weekday-btn px-3 py-2 rounded-lg border-2 border-amber-300 bg-white hover:bg-amber-100 transition text-sm font-medium text-amber-800" data-weekday="3">Qua</button>
+            <button class="weekday-btn px-3 py-2 rounded-lg border-2 border-amber-300 bg-white hover:bg-amber-100 transition text-sm font-medium text-amber-800" data-weekday="4">Qui</button>
+            <button class="weekday-btn px-3 py-2 rounded-lg border-2 border-amber-300 bg-white hover:bg-amber-100 transition text-sm font-medium text-amber-800" data-weekday="5">Sex</button>
+            <button class="weekday-btn px-3 py-2 rounded-lg border-2 border-amber-300 bg-white hover:bg-amber-100 transition text-sm font-medium text-amber-800" data-weekday="6">Sáb</button>
           </div>
-          
-          <!-- Agendar Nova Oração -->
-          <div class="border-t border-teal-300 pt-4">
-            <h5 class="text-md font-semibold text-teal-800 mb-2">Agendar Oração</h5>
-            <form id="scheduleForm" class="flex flex-col gap-3">
-              <input type="time" id="scheduleTime"
-                class="px-3 py-2 rounded-lg border border-teal-400 bg-white focus:ring-2 focus:ring-teal-400 outline-none" 
-                required>
-              <input type="text" id="scheduleName"
-                class="px-3 py-2 rounded-lg border border-teal-400 bg-white focus:ring-2 focus:ring-teal-400 outline-none" 
-                placeholder="Seu nome" maxlength="50" required>
-              <button type="submit"
-                class="bg-teal-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-teal-700 transition">
-                Agendar Oração
-              </button>
-            </form>
-          </div>
-          <!-- Lista de Orações Agendadas -->
-          <div id="scheduledPrayers" class="mt-4 border-t border-teal-300 pt-4">
-            <h5 class="text-md font-semibold text-teal-800 mb-2">Orações Agendadas</h5>
-            <div id="scheduledList" class="flex flex-col gap-2">
-              <!-- Scheduled prayers will appear here -->
+          <!-- Detalhes do Dia da Semana Selecionado -->
+          <div id="weekdayDetails" class="hidden mt-3 p-4 bg-teal-50 rounded-xl border border-teal-200">
+            <h4 id="weekdayTitle" class="text-lg font-semibold text-teal-900 mb-3"></h4>
+            <div id="weekdayStats" class="flex gap-4 mb-3">
+              <div class="flex-1 text-center">
+                <p class="text-sm text-teal-700">Total de Orações</p>
+                <p id="weekdayPrayerCount" class="text-2xl font-bold text-teal-900">0</p>
+              </div>
+              <div class="flex-1 text-center">
+                <p class="text-sm text-teal-700">Tempo Total</p>
+                <p id="weekdayTotalMinutes" class="text-2xl font-bold text-teal-900">0 min</p>
+              </div>
+            </div>
+            <div id="weekdayOccurrences" class="flex flex-col gap-2">
+              <!-- Occurrences will be populated by JavaScript -->
             </div>
           </div>
         </div>
-      </div>
-    </section>
-    <footer class="mt-6 pt-3 border-t border-amber-200 text-center text-amber-600 text-sm select-none">
-      © 2025 Escola Cristã Clássica • Inspirado na tradição e beleza clássica
-    </footer>
-  </main>
-  <script src="app.js" type="module"></script>
-  <style>
-    @keyframes fadeInDown {
-      from { opacity:0; transform: translateY(-30px);}
-      to { opacity:1; transform: translateY(0);}
-    }
-    .animate-fadeInDown { animation: fadeInDown 0.7s cubic-bezier(.52,.37,.32,.81) both;}
-    @keyframes fadeInUp {
-      from { opacity:0; transform: translateY(32px);}
-      to { opacity:1; transform: translateY(0);}
-    }
-    .animate-fadeInUp { animation: fadeInUp 1s cubic-bezier(.66,.27,.29,.89) both;}
-    @keyframes fadeIn {
-      from { opacity:0;}
-      to { opacity:1;}
-    }
-    .animate-fadeIn { animation: fadeIn 1.2s cubic-bezier(.6,.23,.34,.92) both;}
-    .weekday-btn.active {
-      background-color: rgb(245 158 11);
-      color: white;
-      border-color: rgb(217 119 6);
-    }
-  </style>
-</body>
+
+        <!-- Navegação do Calendário -->
+        <div class="flex justify-between items-center mb-4">
+          <button id="prevMonth" class="px-3 py-1 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition">← Anterior</button>
+          <h4 id="currentMonth" class="text-lg font-semibold text-teal-900"></h4>
+          <button id="nextMonth" class="px-3 py-1 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition">Próximo →</button>
+        </div>
+        <!-- Grid do Calendário -->
+        <div class="bg-amber-50 rounded-xl border border-amber-200 p-4">
+          <div class="grid grid-cols-7 gap-2 mb-2 text-center text-sm font-semibold text-amber-700">
+            <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+          </div>
+          <div id="calendarGrid" class="grid grid-cols-7 gap-2">
+            <!-- Days will be populated by JavaScript -->
+          </div>
+        </div>
+        <!-- Detalhes do Dia Selecionado -->
+        <div id="dayDetails" class="mt-4 hidden">
+          <div class="bg-teal-50 rounded-xl border border-teal-200 p-4">
+            <h4 id="selectedDate" class="text-lg font-semibold text-teal-900 mb-3"></h4>
+            <div class="flex gap-4 mb-4">
+              <div class="flex-1 text-center">
+                <p class="text-sm text-teal-700">Orações</p>
+                <p id="dayPrayerCount" class="text-2xl font-bold text-teal-900">0</p>
+              </div>
+              <div class="flex-1 text-center">
+                <p class="text-sm text-teal-700">Tempo Total</p>
+                <p id="dayTotalMinutes" class="text-2xl font-bold text-teal-900">0 min</p>
+              </div>
+            </div>
+            <!-- Agendar Nova Oração -->
+            <div class="border-t border-teal-300 pt-4">
+              <h5 class="text-md font-semibold text-teal-800 mb-2">Agendar Oração</h5>
+              <form id="scheduleForm" class="flex flex-col gap-3">
+                <input type="time" id="scheduleTime" class="px-3 py-2 rounded-lg border border-teal-400 bg-white focus:ring-2 focus:ring-teal-400 outline-none" required />
+                <input type="text" id="scheduleName" class="px-3 py-2 rounded-lg border border-teal-400 bg-white focus:ring-2 focus:ring-teal-400 outline-none" placeholder="Seu nome" maxlength="50" required />
+                <button type="submit" class="bg-teal-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-teal-700 transition">Agendar Oração</button>
+              </form>
+            </div>
+            <!-- Lista de Orações Agendadas -->
+            <div id="scheduledPrayers" class="mt-4 border-t border-teal-300 pt-4">
+              <h5 class="text-md font-semibold text-teal-800 mb-2">Orações Agendadas</h5>
+              <div id="scheduledList" class="flex flex-col gap-2">
+                <!-- Scheduled prayers will appear here -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="mt-6 pt-3 border-t border-amber-200 text-center text-amber-600 text-sm select-none">
+        © 2025 Escola Cristã Clássica • Inspirado na tradição e beleza clássica
+      </footer>
+    </main>
+
+    <script type="module" src="app.js"></script>
+
+    <style>
+      @keyframes fadeInDown { from { opacity:0; transform: translateY(-30px);} to { opacity:1; transform: translateY(0);} }
+      .animate-fadeInDown { animation: fadeInDown 0.7s cubic-bezier(.52,.37,.32,.81) both;}
+      @keyframes fadeInUp { from { opacity:0; transform: translateY(32px);} to { opacity:1; transform: translateY(0);} }
+      .animate-fadeInUp { animation: fadeInUp 1s cubic-bezier(.66,.27,.29,.89) both;}
+      @keyframes fadeIn { from { opacity:0;} to { opacity:1;} }
+      .animate-fadeIn { animation: fadeIn 1.2s cubic-bezier(.6,.23,.34,.92) both;}
+      .weekday-btn.active { background-color: rgb(245 158 11); color: white; border-color: rgb(217 119 6); }
+    </style>
+
+    <script>
+      // Ajuste leve para integração com app.js existente
+      // Esperamos que app.js use o container #listaOradores para inserir elementos de participantes.
+      // Aqui, expomos utilitários para inserir linhas na tabela mantendo compatibilidade.
+      window._oradoresUI = {
+        ensureTable: function() {
+          const container = document.getElementById('listaOradores');
+          if (!container) return null;
+          const tbody = document.getElementById('tbodyOradores');
+          const empty = document.getElementById('emptyState');
+          if (tbody && empty) return { container, tbody, empty };
+          return null;
+        },
+        addRow: function(nome, horario) {
+          const ui = this.ensureTable();
+          if (!ui) return;
+          const tr = document.createElement('tr');
+          tr.className = 'odd:bg-white/60 even:bg-amber-50/50 hover:bg-amber-100/60 transition-colors';
+          const tdNome = document.createElement('td');
+          tdNome.className = 'px-4 py-2 text-teal-900';
+          tdNome.textContent = nome;
+          const tdHora = document.createElement('td');
+          tdHora.className = 'px-4 py-2 text-amber-800';
+          tdHora.textContent = horario;
+          tr.appendChild(tdNome);
+          tr.appendChild(tdHora);
+          ui.tbody.appendChild(tr);
+          if (ui.empty) ui.empty.classList.add('hidden');
+        },
+        clear: function() {
+          const ui = this.ensureTable();
+          if (!ui) return;
+          ui.tbody.innerHTML = '';
+          if (ui.empty) ui.empty.classList.remove('hidden');
+        }
+      };
+    </script>
+  </body>
 </html>
