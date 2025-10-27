@@ -6,14 +6,20 @@
     <meta name="description" content="Escala de Oração - Escola Cristã Clássica. Participe de uma escala diária de oração aberta, anônima e espontânea.">
     <meta name="theme-color" content="#1e3a5f">
     <title>Escala de Oração - Escola Cristã Clássica</title>
+    
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- Background Decoration -->
     <div class="background-decoration"></div>
     
+    <!-- Container -->
     <div class="container">
         <!-- Header -->
         <header class="header">
@@ -59,73 +65,51 @@
                                 required
                             >
                         </div>
-                        <button type="button" onclick="registrarOracao()">Registrar Oração</button>
+                        <button type="button" class="btn-submit" onclick="registrarOracao()">Registrar Oração</button>
                     </form>
-                    
-                    <div id="successMessage" class="success-message hidden">
-                        <div class="success-icon">✓</div>
-                        <p>Obrigado por se unir em oração!</p>
+                </div>
+            </section>
+
+            <!-- Today's Stats Section -->
+            <section class="stats-section">
+                <h3>Orações de Hoje</h3>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="minutosHoje">0</div>
+                        <div class="stat-label">Minutos hoje</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="participantesHoje">0</div>
+                        <div class="stat-label">Participantes hoje</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="weeklyMinutes">0</div>
+                        <div class="stat-label">Minutos esta semana</div>
                     </div>
                 </div>
-            </section>
 
-            <!-- Stats Section -->
-            <section class="stats-section">
-                <div class="stat-card">
-                    <div class="stat-value" id="minutosHoje">0</div>
-                    <div class="stat-label">Minutos Hoje</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="weeklyMinutes">0</div>
-                    <div class="stat-label">Minutos Esta Semana</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="participantesHoje">0</div>
-                    <div class="stat-label">Participantes Hoje</div>
-                </div>
-            </section>
-
-            <!-- Calendar Section -->
-            <section class="calendar-section">
-                <h3>Calendário de Oração</h3>
-                <div class="calendar-controls">
-                    <button id="prevMonth" class="btn-nav">← Anterior</button>
-                    <h4 id="monthYear" class="month-year"></h4>
-                    <button id="nextMonth" class="btn-nav">Próximo →</button>
-                </div>
-                <div id="calendar" class="calendar-grid"></div>
-            </section>
-
-            <!-- Daily Participants Section -->
-            <section class="participants-section">
-                <h3>Quem Orou Hoje?</h3>
-                <div id="listaOradores" class="participants-list">
-                    <p class="empty-state">Nenhuma oração registrada ainda. Seja o primeiro!</p>
+                <!-- Participants List -->
+                <div class="participants-section">
+                    <h4>Quem Já Orou Hoje</h4>
+                    <div class="participants-list" id="listaOradores">
+                        <p class="empty-state">Nenhuma oração registrada ainda. Seja o primeiro!</p>
+                    </div>
                 </div>
             </section>
         </main>
 
         <!-- Footer -->
         <footer class="footer">
-            <p>Escala de Oração — Escola Cristã Clássica</p>
-            <p class="footer-text">Uma iniciativa de comunhão e intercessão</p>
+            <p>Escola Cristã Clássica - Um Projeto de Fé e Educação</p>
         </footer>
     </div>
 
-    <!-- Supabase Integration -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/supabase.min.js"></script>
+    <!-- Scripts -->
     <script src="supabaseClient.js"></script>
     <script src="app.js"></script>
-    
     <script>
-        // Integração Supabase
-        const SUPABASE_URL = 'https://your-project.supabase.co';
-        const SUPABASE_ANON_KEY = 'your-anon-key-here';
-        
-        const { createClient } = supabase;
-        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        
-        // Função para registrar oração
+        // Função de registro de oração
         async function registrarOracao() {
             const nameInput = document.getElementById('nameInput');
             const name = nameInput.value.trim();
@@ -136,10 +120,11 @@
             }
             
             try {
+                // Inserir oração no Supabase
                 const { data, error } = await supabaseClient
                     .from('oracoes')
                     .insert([
-                        {
+                        { 
                             nome: name,
                             data: new Date().toISOString(),
                             minutos: 5
@@ -148,18 +133,12 @@
                 
                 if (error) throw error;
                 
-                // Mostrar mensagem de sucesso
-                document.getElementById('successMessage').classList.remove('hidden');
+                // Limpar formulário
                 nameInput.value = '';
-                
-                // Ocultar mensagem após 3 segundos
-                setTimeout(() => {
-                    document.getElementById('successMessage').classList.add('hidden');
-                }, 3000);
+                alert('Oração registrada com sucesso! Obrigado por participar.');
                 
                 // Atualizar visualizações
                 await atualizarOracoes();
-                
             } catch (error) {
                 console.error('Erro ao registrar oração:', error);
                 alert('Erro ao registrar oração. Tente novamente.');
