@@ -3,16 +3,7 @@
 // ============================================
 
 // Import Supabase client
-import supabase from "./supabaseClient.js";
-const supabaseUrl = 'https://illgbfpmtcxiszihuyfh.supabase.co'
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsbGdiZnBtdGN4aXN6aWh1eWZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1NzM4MTUsImV4cCI6MjA3NzE0OTgxNX0.lKoU_mX_5q7dWEFi3wi7-eRC-rhmfe4tuIkJTbbSHhM'
-const supabase = createClient(supabaseUrl, supabaseKey)
-
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = 'https://illgbfpmtcxiszihuyfh.supabase.co'
-const supabaseKey = process.env.SUPABASE_KEY
-const supabase = createClient(supabaseUrl, supabaseKey)
+import supabase from './supabaseClient.js';
 
 // Data Management
 async function registrarOracao() {
@@ -59,24 +50,12 @@ const DataManager = {
       .from('escala_oracao')
       .select('*')
       .eq('data', dateStr);
-    // Adapta para ["name"]
-    return (data || []).map(item => ({ name: item.nome }));
-  },
 
-  // Busca os dias do mês que têm oração
-  async getDatesWithPrayersInMonth(year, month) {
-    const startDate = `${year}-${String(month+1).padStart(2,'0')}-01`;
-    const endDate = `${year}-${String(month+1).padStart(2,'0')}-31`;
-    let { data, error } = await supabase
-      .from('escala_oracao')
-      .select('data')
-      .gte('data', startDate)
-      .lte('data', endDate);
-    if (error) {
-      console.error('Erro ao buscar datas:', error);
-      return [];
+    // Adapta para ["name"]
+    if (!error && data) {
+      return data.map(item => item.nome);
     }
-    return [...new Set((data || []).map(item => item.data))];
+    return [];
   },
 
   // Remove uma oração
@@ -91,175 +70,212 @@ const DataManager = {
   }
 };
 
-// ============================================
-// CALENDAR & UI LOGIC
-// ============================================
-
-let currentMonth = new Date().getMonth();
-let currentYear = new Date().getFullYear();
-let selectedDate = null;
-
-const monthNames = [
-  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-];
-
-// Atualiza o calendário
-async function updateCalendar() {
-  const monthNameEl = document.getElementById('monthName');
-  monthNameEl.textContent = `${monthNames[currentMonth]} ${currentYear}`;
-
-  const datesWithPrayers = await DataManager.getDatesWithPrayersInMonth(currentYear, currentMonth);
-  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-
-  const calendarGrid = document.getElementById('calendarGrid');
-  calendarGrid.innerHTML = '';
-
-  // Preenche células vazias
-  for (let i = 0; i < firstDay; i++) {
-    const emptyCell = document.createElement('div');
-    emptyCell.className = 'calendar-day empty';
-    calendarGrid.appendChild(emptyCell);
+// Calendar Management
+class CalendarManager {
+  constructor(containerId) {
+    this.container = document.getElementById(containerId);
+    this.currentDate = new Date();
+    this.selectedDate = null;
   }
 
-  // Preenche os dias
-  for (let day = 1; day <= daysInMonth; day++) {
-    const dayCell = document.createElement('div');
-    dayCell.className = 'calendar-day';
-    dayCell.textContent = day;
+  render() {
+    const year = this.currentDate.getFullYear();
+    const month = this.currentDate.getMonth();
 
-    const currentDate = new Date(currentYear, currentMonth, day);
-    const dateStr = currentDate.toISOString().slice(0,10);
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
 
-    if (datesWithPrayers.includes(dateStr)) {
-      dayCell.classList.add('has-prayer');
-    }
-
-    const today = new Date();
-    if (day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
-      dayCell.classList.add('today');
-    }
-
-    dayCell.addEventListener('click', () => selectDate(currentDate));
-    calendarGrid.appendChild(dayCell);
-  }
-}
-
-// Seleciona uma data
-async function selectDate(date) {
-  selectedDate = date;
-  document.querySelectorAll('.calendar-day').forEach(cell => {
-    cell.classList.remove('selected');
-  });
-  event.target.classList.add('selected');
-
-  const prayers = await DataManager.getPrayersForDate(date);
-  displayPrayers(prayers);
-}
-
-// Exibe orações do dia
-function displayPrayers(prayers) {
-  const prayerList = document.getElementById('prayerList');
-  const dateDisplay = document.getElementById('selectedDate');
-
-  if (selectedDate) {
-    dateDisplay.textContent = selectedDate.toLocaleDateString('pt-BR');
-  }
-
-  if (!prayers || prayers.length === 0) {
-    prayerList.innerHTML = '<p class="no-prayers">Nenhuma oração registrada neste dia.</p>';
-    return;
-  }
-
-  prayerList.innerHTML = '';
-  prayers.forEach(prayer => {
-    const prayerItem = document.createElement('div');
-    prayerItem.className = 'prayer-item';
-    prayerItem.innerHTML = `
-      <span>${prayer.name}</span>
-      <button onclick="removePrayer('${prayer.name}')">Remover</button>
+    let html = `
+      <div class="calendar-header">
+        <button id="prevMonth">◄</button>
+        <h2>${this.getMonthName(month)} ${year}</h2>
+        <button id="nextMonth">►</button>
+      </div>
+      <div class="calendar-weekdays">
+        <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div>
+        <div>Qui</div><div>Sex</div><div>Sáb</div>
+      </div>
+      <div class="calendar-days">
     `;
-    prayerList.appendChild(prayerItem);
+
+    // Empty cells before first day
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      html += '<div class="calendar-day empty"></div>';
+    }
+
+    // Days of month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, month, day);
+      const isToday = this.isToday(date);
+      const isSelected = this.selectedDate && this.isSameDay(date, this.selectedDate);
+      const classes = ['calendar-day'];
+      if (isToday) classes.push('today');
+      if (isSelected) classes.push('selected');
+
+      html += `<div class="${classes.join(' ')}" data-date="${date.toISOString()}">${day}</div>`;
+    }
+
+    html += '</div></div>';
+    this.container.innerHTML = html;
+    this.attachEventListeners();
+  }
+
+  attachEventListeners() {
+    document.getElementById('prevMonth')?.addEventListener('click', () => {
+      this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+      this.render();
+    });
+
+    document.getElementById('nextMonth')?.addEventListener('click', () => {
+      this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+      this.render();
+    });
+
+    const dayElements = this.container.querySelectorAll('.calendar-day:not(.empty)');
+    dayElements.forEach(el => {
+      el.addEventListener('click', () => {
+        this.selectedDate = new Date(el.dataset.date);
+        this.render();
+        this.onDateSelect(this.selectedDate);
+      });
+    });
+  }
+
+  onDateSelect(date) {
+    // Override this method
+    console.log('Date selected:', date);
+  }
+
+  getMonthName(month) {
+    const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    return months[month];
+  }
+
+  isToday(date) {
+    const today = new Date();
+    return this.isSameDay(date, today);
+  }
+
+  isSameDay(date1, date2) {
+    return date1.getDate() === date2.getDate() &&
+           date1.getMonth() === date2.getMonth() &&
+           date1.getFullYear() === date2.getFullYear();
+  }
+}
+
+// Prayer List Manager
+class PrayerListManager {
+  constructor(containerId) {
+    this.container = document.getElementById(containerId);
+    this.currentDate = null;
+    this.prayers = [];
+  }
+
+  async loadPrayers(date) {
+    this.currentDate = date;
+    this.prayers = await DataManager.getPrayersForDate(date);
+    this.render();
+  }
+
+  render() {
+    if (!this.currentDate) {
+      this.container.innerHTML = '<p>Selecione uma data no calendário</p>';
+      return;
+    }
+
+    const dateStr = this.currentDate.toLocaleDateString('pt-BR');
+    let html = `<h3>Orações para ${dateStr}</h3>`;
+
+    if (this.prayers.length === 0) {
+      html += '<p>Nenhuma oração registrada para esta data.</p>';
+    } else {
+      html += '<ul class="prayer-list">';
+      this.prayers.forEach(name => {
+        html += `
+          <li>
+            <span>${name}</span>
+            <button class="remove-prayer" data-name="${name}">Remover</button>
+          </li>
+        `;
+      });
+      html += '</ul>';
+    }
+
+    this.container.innerHTML = html;
+    this.attachEventListeners();
+  }
+
+  attachEventListeners() {
+    const removeButtons = this.container.querySelectorAll('.remove-prayer');
+    removeButtons.forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const name = btn.dataset.name;
+        await this.removePrayer(name);
+      });
+    });
+  }
+
+  async removePrayer(name) {
+    const { error } = await DataManager.removePrayer(this.currentDate, name);
+    if (error) {
+      alert('Erro ao remover oração: ' + error.message);
+    } else {
+      await this.loadPrayers(this.currentDate);
+    }
+  }
+
+  async addPrayer(name) {
+    if (!this.currentDate) {
+      alert('Selecione uma data primeiro');
+      return;
+    }
+
+    if (!name.trim()) {
+      alert('Digite um nome válido');
+      return;
+    }
+
+    const { error } = await DataManager.addPrayer(this.currentDate, name);
+    if (error) {
+      alert('Erro ao adicionar oração: ' + error.message);
+    } else {
+      await this.loadPrayers(this.currentDate);
+    }
+  }
+}
+
+// Initialize Application
+let calendar, prayerList;
+
+window.addEventListener('DOMContentLoaded', () => {
+  // Initialize calendar
+  calendar = new CalendarManager('calendar');
+  calendar.onDateSelect = async (date) => {
+    await prayerList.loadPrayers(date);
+  };
+  calendar.render();
+
+  // Initialize prayer list
+  prayerList = new PrayerListManager('prayerList');
+
+  // Add prayer button
+  document.getElementById('addPrayerBtn')?.addEventListener('click', async () => {
+    const nameInput = document.getElementById('nameInput');
+    const name = nameInput.value;
+    await prayerList.addPrayer(name);
+    nameInput.value = '';
   });
-}
-
-// Adiciona oração
-async function addPrayer() {
-  const input = document.getElementById('prayerInput');
-  const name = input.value.trim();
-
-  if (!name) {
-    alert('Por favor, insira um nome.');
-    return;
-  }
-
-  if (!selectedDate) {
-    alert('Por favor, selecione uma data no calendário.');
-    return;
-  }
-
-  const { error } = await DataManager.addPrayer(selectedDate, name);
-
-  if (error) {
-    alert('Erro ao adicionar oração: ' + error.message);
-  } else {
-    input.value = '';
-    await updateCalendar();
-    await selectDate(selectedDate);
-  }
-}
-
-// Remove oração
-async function removePrayer(name) {
-  if (!selectedDate) return;
-
-  const { error } = await DataManager.removePrayer(selectedDate, name);
-
-  if (error) {
-    alert('Erro ao remover oração: ' + error.message);
-  } else {
-    await updateCalendar();
-    await selectDate(selectedDate);
-  }
-}
-
-// Atualiza orações (chamada externa)
-async function atualizarOracoes() {
-  await updateCalendar();
-  if (selectedDate) {
-    const prayers = await DataManager.getPrayersForDate(selectedDate);
-    displayPrayers(prayers);
-  }
-}
-
-// Navegação do calendário
-function previousMonth() {
-  currentMonth--;
-  if (currentMonth < 0) {
-    currentMonth = 11;
-    currentYear--;
-  }
-  updateCalendar();
-}
-
-function nextMonth() {
-  currentMonth++;
-  if (currentMonth > 11) {
-    currentMonth = 0;
-    currentYear++;
-  }
-  updateCalendar();
-}
-
-// Inicialização
-document.addEventListener('DOMContentLoaded', () => {
-  updateCalendar();
 });
 
-// Exporta funções globais
-window.addPrayer = addPrayer;
-window.removePrayer = removePrayer;
-window.previousMonth = previousMonth;
-window.nextMonth = nextMonth;
+// Função auxiliar para atualizar a lista de orações
+async function atualizarOracoes() {
+  if (prayerList && prayerList.currentDate) {
+    await prayerList.loadPrayers(prayerList.currentDate);
+  }
+}
+
+// Export for use in HTML
 window.registrarOracao = registrarOracao;
