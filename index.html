@@ -1,203 +1,30 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Escala de Oração - Escola Cristã Clássica. Participe de uma escala diária de oração aberta, anônima e espontânea.">
-    <meta name="theme-color" content="#1e3a5f">
-    <title>Escala de Oração - Escola Cristã Clássica</title>
-    
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    
-    <!-- Styles -->
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Escala de Oração - Escola Cristã Clássica</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Background Decoration -->
-    <div class="background-decoration"></div>
-    
-    <!-- Container -->
-    <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-content">
-                <h1 class="title">Escala de Oração</h1>
-                <p class="subtitle">Escola Cristã Clássica</p>
-            </div>
-        </header>
-
-        <!-- Introduction Section -->
-        <section class="intro-section">
-            <div class="intro-content">
-                <h2>Participe da Nossa Escala de Oração</h2>
-                <p>
-                    Convidamos você a se unir em oração pelo futuro e desenvolvimento da Escola Cristã Clássica. 
-                    Esta é uma escala <strong>aberta, anônima e espontânea</strong> onde qualquer pessoa pode dedicar 
-                    5 minutos de oração pelo projeto.
-                </p>
-                <p>
-                    Sua participação é um ato de fé e comunhão. Não é necessário login — apenas digite seu nome ou apelido 
-                    e registre sua oração. Juntos, formamos uma corrente de intercessão pelo crescimento espiritual e 
-                    educacional da nossa comunidade.
-                </p>
-                <div class="divider"></div>
-            </div>
-        </section>
-
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Prayer Input Section -->
-            <section class="prayer-input-section">
-                <div class="input-card">
-                    <h3>Registre Sua Oração Hoje</h3>
-                    <p class="input-subtitle">Dedique 5 minutos de oração pelo projeto</p>
-                    
-                    <form id="prayerForm" class="prayer-form" onsubmit="return false;">
-                        <div class="form-group">
-                            <input 
-                                type="text" 
-                                id="nameInput" 
-                                placeholder="Seu nome ou apelido" 
-                                maxlength="50"
-                                required
-                            >
-                        </div>
-                        <button type="button" class="btn-submit" onclick="registrarOracao()">Registrar Oração</button>
-                    </form>
-                </div>
-            </section>
-
-            <!-- Today's Stats Section -->
-            <section class="stats-section">
-                <h3>Orações de Hoje</h3>
-                
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value" id="minutosHoje">0</div>
-                        <div class="stat-label">Minutos hoje</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="participantesHoje">0</div>
-                        <div class="stat-label">Participantes hoje</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="weeklyMinutes">0</div>
-                        <div class="stat-label">Minutos esta semana</div>
-                    </div>
-                </div>
-
-                <!-- Participants List -->
-                <div class="participants-section">
-                    <h4>Quem Já Orou Hoje</h4>
-                    <div id="listaOradores" class="participants-list">
-                        <p class="empty-state">Nenhuma oração registrada ainda. Seja o primeiro!</p>
-                    </div>
-                </div>
-            </section>
-        </main>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <p>Escola Cristã Clássica - Um Projeto de Fé e Educação</p>
-        </footer>
-    </div>
-
-    <!-- Scripts -->
-    <script src="supabaseClient.js"></script>
-    <script src="app.js"></script>
-    <script>
-        // Função de registro de oração
-        async function registrarOracao() {
-            const nameInput = document.getElementById('nameInput');
-            const name = nameInput.value.trim();
-            
-            if (!name) {
-                alert('Por favor, digite seu nome ou apelido.');
-                return;
-            }
-            
-            try {
-                // Inserir oração no Supabase
-                const { data, error } = await supabaseClient
-                    .from('escala_oracao')
-                    .insert([
-                        { 
-                            nome: name,
-                            data: new Date().toISOString().substring(0, 10),
-                            hora: new Date().toTimeString().substring(0, 8),
-                            responsavel: name,
-                            observacoes: ''
-                        }
-                    ]);
-                
-                if (error) throw error;
-                
-                // Limpar formulário
-                nameInput.value = '';
-                alert('Oração registrada com sucesso! Obrigado por participar.');
-                
-                // Atualizar visualizações
-                await atualizarOracoes();
-            } catch (error) {
-                console.error('Erro ao registrar oração:', error);
-                alert('Erro ao registrar oração. Tente novamente.');
-            }
-        }
-        
-        // Função para atualizar orações
-        async function atualizarOracoes() {
-            try {
-                const hoje = new Date();
-                hoje.setHours(0, 0, 0, 0);
-                const inicioSemana = new Date(hoje);
-                inicioSemana.setDate(hoje.getDate() - hoje.getDay());
-                
-                // Buscar orações de hoje
-                const { data: oracoesHoje, error: errorHoje } = await supabaseClient
-                    .from('escala_oracao')
-                    .select('*')
-                    .gte('data', hoje.toISOString().substring(0, 10));
-                
-                if (errorHoje) throw errorHoje;
-                
-                // Buscar orações da semana
-                const { data: oracoesSemana, error: errorSemana } = await supabaseClient
-                    .from('escala_oracao')
-                    .select('*')
-                    .gte('data', inicioSemana.toISOString().substring(0, 10));
-                
-                if (errorSemana) throw errorSemana;
-                
-                // Atualizar contadores (cada oração = 5 minutos)
-                const minutosHoje = (oracoesHoje || []).length * 5;
-                const minutosSemana = (oracoesSemana || []).length * 5;
-                const participantesHoje = (oracoesHoje || []).length;
-                
-                document.getElementById('minutosHoje').textContent = minutosHoje;
-                document.getElementById('weeklyMinutes').textContent = minutosSemana;
-                document.getElementById('participantesHoje').textContent = participantesHoje;
-                
-                // Atualizar lista de oradores
-                const listaOradores = document.getElementById('listaOradores');
-                if (!oracoesHoje || oracoesHoje.length === 0) {
-                    listaOradores.innerHTML = '<p class="empty-state">Nenhuma oração registrada ainda. Seja o primeiro!</p>';
-                } else {
-                    listaOradores.innerHTML = oracoesHoje
-                        .map(oracao => `<div class="participant-item">${oracao.nome}</div>`)
-                        .join('');
-                }
-                
-            } catch (error) {
-                console.error('Erro ao atualizar orações:', error);
-            }
-        }
-        
-        // Carregar orações ao iniciar
-        document.addEventListener('DOMContentLoaded', atualizarOracoes);
-    </script>
-    <script type="module" src="app.js"></script>
+  <main>
+    <h1>Escala de Oração - Escola Cristã Clássica</h1>
+    <p>Dedique 5 minutos de oração pelo projeto. Basta digitar seu nome ou apelido.</p>
+    <form id="formOracao">
+      <input type="text" id="nameInput" placeholder="Seu nome ou apelido" maxlength="50" required>
+      <button type="submit">Registrar Oração</button>
+    </form>
+    <section id="status">
+      <h2>Estatísticas de Oração</h2>
+      <p><strong id="minutosHoje">0</strong> Minutos hoje</p>
+      <p><strong id="participantesHoje">0</strong> Participantes hoje</p>
+      <p><strong id="weeklyMinutes">0</strong> Minutos esta semana</p>
+    </section>
+    <section>
+      <h2>Quem Já Orou Hoje</h2>
+      <div id="listaOradores"><p class="empty-state">Nenhuma oração registrada ainda. Seja o primeiro!</p></div>
+    </section>
+  </main>
+  <script type="module" src="app.js"></script>
 </body>
 </html>
