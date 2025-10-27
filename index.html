@@ -3,27 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>Escala de Oração - Escola Cristã Clássica</title>
+  <title>Escala de Oração • Escola Cristã Clássica</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <main>
-    <h1>Escala de Oração - Escola Cristã Clássica</h1>
-    <p>Dedique 5 minutos de oração pelo projeto. Basta digitar seu nome ou apelido.</p>
-    <form id="formOracao">
+    <header class="header-classic">
+      <h1>Escala de Oração</h1>
+      <h2>Escola Cristã Clássica</h2>
+      <hr class="hr-classic">
+    </header>
+    <section class="intro-classic">
+      <p>
+        Dedique <strong>5 minutos</strong> de oração pelo projeto.<br>
+        Basta digitar seu nome ou apelido e registrar abaixo.
+      </p>
+    </section>
+    <form id="formOracao" class="form-classic">
       <input type="text" id="nameInput" placeholder="Seu nome ou apelido" maxlength="50" required>
       <button type="submit">Registrar Oração</button>
     </form>
-    <section id="status">
-      <h2>Estatísticas de Oração</h2>
+    <section id="status" class="status-classic">
+      <h3>Estatísticas de Oração</h3>
       <p><strong id="minutosHoje">0</strong> Minutos hoje</p>
       <p><strong id="participantesHoje">0</strong> Participantes hoje</p>
       <p><strong id="weeklyMinutes">0</strong> Minutos esta semana</p>
     </section>
-    <section>
-      <h2>Quem Já Orou Hoje</h2>
+    <section class="list-classic">
+      <h3>Quem Já Orou Hoje</h3>
       <div id="listaOradores"><p class="empty-state">Nenhuma oração registrada ainda. Seja o primeiro!</p></div>
     </section>
+    <footer class="footer-classic">
+      &copy; 2025 Escola Cristã Clássica • Projeto Escala de Oração<br>
+      <span>Inspirado na tradição e beleza clássica</span>
+    </footer>
   </main>
   <script type="module" src="app.js"></script>
 </body>
