@@ -10,7 +10,6 @@ const supabase = createClient(
 let currentMonth = new Date();
 let selectedDate = null;
 let weekdaySelected = null; // 0-6 Sunday-Saturday
-
 const WEEKDAY_LABELS = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
 
 // Helpers
@@ -23,7 +22,6 @@ async function registrarOracao(event) {
   const nameInput = document.getElementById('nameInput');
   const name = nameInput.value.trim();
   if (!name) return alert('Por favor, digite seu nome ou apelido.');
-
   const now = new Date();
   const { error } = await supabase
     .from('escala_oracao')
@@ -35,204 +33,125 @@ async function registrarOracao(event) {
   if (weekdaySelected !== null) await renderWeekdaySummary(weekdaySelected); // keep weekday panel updated
 }
 
-// Painel Hoje/Semana e lista do dia
-async function atualizarOracoes() {
-  const hoje = new Date(); hoje.setHours(0,0,0,0);
-  const inicioSemana = new Date(hoje); inicioSemana.setDate(hoje.getDate() - hoje.getDay());
-
-  const { data: oracoesHoje = [] } = await supabase.from('escala_oracao').select('*').eq('data', toDateStr(hoje));
-  const { data: oracoesSemana = [] } = await supabase.from('escala_oracao').select('*').gte('data', toDateStr(inicioSemana));
-
-  document.getElementById('minutosHoje').textContent = (oracoesHoje.length * 5).toString();
-  document.getElementById('participantesHoje').textContent = oracoesHoje.length.toString();
-  document.getElementById('weeklyMinutes').textContent = (oracoesSemana.length * 5).toString();
-
-  const listaEl = document.getElementById('listaOradores');
-  if (oracoesHoje.length === 0) {
-    listaEl.innerHTML = `<p class="italic text-amber-400 text-base empty-state">Nenhuma oração registrada ainda. Seja o primeiro!</p>`;
-  } else {
-    listaEl.innerHTML = oracoesHoje.map(item =>
-      `<div class="w-full bg-white rounded-lg border border-amber-200 text-teal-900 text-base px-3 py-1 shadow animate-fadeIn">${item.nome}</div>`
-    ).join('');
-  }
-}
-
-// Renderização do calendário
-async function renderCalendar() {
-  const year = currentMonth.getFullYear();
-  const month = currentMonth.getMonth();
-
-  const monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  document.getElementById('currentMonth').textContent = `${monthNames[month]} ${year}`;
-
-  const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month + 1, 0);
-  const daysInMonth = lastDay.getDate();
-  const startDayOfWeek = firstDay.getDay();
-
-  const startDate = toDateStr(firstDay);
-  const endDate = toDateStr(lastDay);
-
-  const { data: prayersInMonth = [] } = await supabase
-    .from('escala_oracao')
-    .select('data')
-    .gte('data', startDate)
-    .lte('data', endDate);
-
-  const { data: scheduledPrayers = [] } = await supabase
-    .from('oracoes_agendadas')
-    .select('data')
-    .gte('data', startDate)
-    .lte('data', endDate);
-
-  const prayersByDay = {};
-  prayersInMonth.forEach(p => { const d = new Date(p.data).getDate(); prayersByDay[d] = (prayersByDay[d] || 0) + 1; });
-  const scheduledByDay = {};
-  scheduledPrayers.forEach(p => { const d = new Date(p.data).getDate(); scheduledByDay[d] = (scheduledByDay[d] || 0) + 1; });
-
-  const calendarGrid = document.getElementById('calendarGrid');
-  calendarGrid.innerHTML = '';
-
-  for (let i = 0; i < startDayOfWeek; i++) {
-    const empty = document.createElement('div'); empty.className = 'h-12'; calendarGrid.appendChild(empty);
-  }
-
-  const today = new Date(); today.setHours(0,0,0,0);
-  for (let day = 1; day <= daysInMonth; day++) {
-    const dayDate = new Date(year, month, day); dayDate.setHours(0,0,0,0);
-    const isToday = dayDate.getTime() === today.getTime();
-    const prayerCount = prayersByDay[day] || 0;
-    const scheduledCount = scheduledByDay[day] || 0;
-
-    const btn = document.createElement('button');
-    btn.className = `h-12 rounded-lg border transition relative ${isToday ? 'border-amber-500 bg-amber-100 font-bold' : 'border-amber-200 bg-white hover:bg-amber-50'}`;
-    btn.innerHTML = `
-      <div class="text-sm ${isToday ? 'text-amber-700' : 'text-teal-900'}">${day}</div>
-      ${prayerCount > 0 ? '<div class="absolute top-0 right-0 w-2 h-2 bg-green-500 rounded-full m-1"></div>' : ''}
-      ${scheduledCount > 0 ? '<div class="absolute bottom-0 right-0 w-2 h-2 bg-blue-500 rounded-full m-1"></div>' : ''}
-    `;
-    btn.addEventListener('click', () => selectDate(new Date(year, month, day)));
-    calendarGrid.appendChild(btn);
-  }
-}
-
-// Seleção de um dia específico
-async function selectDate(date) {
-  selectedDate = date;
-  const dateStr = toDateStr(date);
-  const dayDetails = document.getElementById('dayDetails'); dayDetails.classList.remove('hidden');
-  const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-  document.getElementById('selectedDate').textContent = date.toLocaleDateString('pt-BR', dateOptions);
-
-  const { data: prayers = [] } = await supabase.from('escala_oracao').select('*').eq('data', dateStr);
-  const totalMinutes = prayers.length * 5;
-  document.getElementById('dayPrayerCount').textContent = prayers.length.toString();
-  document.getElementById('dayTotalMinutes').textContent = minutesToHuman(totalMinutes);
-
-  await loadScheduledPrayers(dateStr);
-  dayDetails.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-
-// Lista agendada do dia
-async function loadScheduledPrayers(dateStr) {
-  const { data: scheduled = [] } = await supabase
-    .from('oracoes_agendadas')
-    .select('*')
-    .eq('data', dateStr)
-    .order('horario', { ascending: true });
-  const scheduledList = document.getElementById('scheduledList');
-  if (scheduled.length === 0) {
-    scheduledList.innerHTML = '<p class="text-sm text-teal-600 italic">Nenhuma oração agendada para este dia.</p>';
-  } else {
-    scheduledList.innerHTML = scheduled.map(item => `
-      <div class="flex justify-between items-center bg-white border border-teal-200 rounded-lg px-3 py-2">
-        <div>
-          <span class="font-semibold text-teal-900">${item.horario.slice(0,5)}</span>
-          <span class="text-teal-700 ml-2">${item.nome}</span>
-        </div>
-        <button class="text-red-500 hover:text-red-700 text-sm" onclick="deleteScheduled(${item.id})">✕</button>
-      </div>
-    `).join('');
-  }
-}
-
 // Agendar nova oração
 async function scheduleNewPrayer(event) {
   event.preventDefault();
-  if (!selectedDate) { alert('Por favor, selecione uma data no calendário primeiro.'); return; }
-
-  const time = document.getElementById('scheduleTime').value;
-  const name = document.getElementById('scheduleName').value.trim();
-  if (!time || !name) { alert('Por favor, preencha todos os campos.'); return; }
-
-  const dateStr = toDateStr(selectedDate);
-  const { error } = await supabase.from('oracoes_agendadas').insert([{ data: dateStr, horario: `${time}:00`, nome: name }]);
-  if (error) { alert('Erro ao agendar oração! Tente novamente.'); return; }
-
-  document.getElementById('scheduleTime').value = '';
-  document.getElementById('scheduleName').value = '';
-  await loadScheduledPrayers(dateStr);
+  const form = event.target;
+  const nome = form.scheduleName.value.trim();
+  const data = form.scheduleDate.value;
+  const hora = form.scheduleTime.value;
+  const responsavel = form.scheduleResponsavel.value.trim();
+  const observacoes = form.scheduleNotes.value.trim();
+  if (!nome || !data || !hora) return alert('Preencha nome, data e hora.');
+  const { error } = await supabase
+    .from('escala_oracao')
+    .insert([{ nome, data, hora, responsavel: responsavel||nome, observacoes }]);
+  if (error) { alert('Erro ao agendar oração!'); return; }
+  form.reset();
+  await atualizarOracoes();
   await renderCalendar();
+  if (weekdaySelected !== null) await renderWeekdaySummary(weekdaySelected);
 }
 
-// Remover agendamento
-window.deleteScheduled = async function(id) {
-  if (!confirm('Deseja remover esta oração agendada?')) return;
-  const { error } = await supabase.from('oracoes_agendadas').delete().eq('id', id);
-  if (error) { alert('Erro ao remover oração agendada!'); return; }
-  const dateStr = toDateStr(selectedDate);
-  await loadScheduledPrayers(dateStr);
-  await renderCalendar();
-};
+// Buscar orações (global)
+let allPrayers = [];
+async function atualizarOracoes() {
+  const { data, error } = await supabase.from('escala_oracao').select('*').order('data', { ascending: false }).order('hora', { ascending: false });
+  if (error) { console.error(error); return; }
+  allPrayers = data || [];
+}
 
-// Weekday summary (Dom-Sáb)
-async function renderWeekdaySummary(weekday) {
-  weekdaySelected = weekday;
-  // Toggle active styles
-  document.querySelectorAll('.weekday-btn').forEach(btn => {
-    if (parseInt(btn.dataset.weekday) === weekday) btn.classList.add('active');
-    else btn.classList.remove('active');
-  });
-
+// Render calendário
+async function renderCalendar() {
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
-
-  // Query month range
-  const { data: prayers = [] } = await supabase
-    .from('escala_oracao')
-    .select('data')
-    .gte('data', toDateStr(firstDay))
-    .lte('data', toDateStr(lastDay));
-
-  // Build map dateStr -> count for this weekday
-  const counts = {}; // dateStr => number
-  prayers.forEach(p => {
-    const d = new Date(p.data); if (d.getDay() !== weekday) return;
-    const key = toDateStr(d); counts[key] = (counts[key] || 0) + 1;
+  const firstDayWeek = firstDay.getDay();
+  const daysInMonth = lastDay.getDate();
+  document.getElementById('currentMonthYear').textContent = firstDay.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  const calendarGrid = document.getElementById('calendarGrid');
+  calendarGrid.innerHTML = '';
+  const counts = {};
+  allPrayers.forEach(p => { counts[p.data] = (counts[p.data] || 0) + 1; });
+  for (let i = 0; i < firstDayWeek; i++) calendarGrid.innerHTML += '<div></div>';
+  for (let day = 1; day <= daysInMonth; day++) {
+    const d = new Date(year, month, day);
+    const dStr = toDateStr(d);
+    const count = counts[dStr] || 0;
+    const isToday = (new Date().toDateString() === d.toDateString());
+    const isSelected = selectedDate && (selectedDate.toDateString() === d.toDateString());
+    let classes = 'p-2 rounded-lg text-center cursor-pointer transition-all hover:bg-amber-100';
+    if (isToday) classes += ' ring-2 ring-teal-500';
+    if (isSelected) classes += ' bg-teal-500 text-white';
+    else if (count > 0) classes += ' bg-amber-100 text-teal-900';
+    else classes += ' bg-white text-gray-700';
+    calendarGrid.innerHTML += `
+      <div class="${classes}" data-date="${dStr}">
+        <div class="font-semibold">${day}</div>
+        ${count > 0 ? `<div class="text-xs text-teal-700">${count} • ${minutesToHuman(count*5)}</div>` : ''}
+      </div>`;
+  }
+  document.querySelectorAll('[data-date]').forEach(cell => {
+    cell.addEventListener('click', () => selectDate(new Date(cell.dataset.date + 'T00:00:00')));
   });
+}
 
+// Selecionar dia
+async function selectDate(date) {
+  selectedDate = date;
+  weekdaySelected = null;
+  const dateStr = toDateStr(date);
+  const dayPrayers = allPrayers.filter(p => p.data === dateStr);
+  document.getElementById('selectedDateDisplay').textContent = date.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+  document.getElementById('dayPrayerCount').textContent = dayPrayers.length.toString();
+  document.getElementById('dayTotalMinutes').textContent = minutesToHuman(dayPrayers.length * 5);
+  const listEl = document.getElementById('prayerList');
+  if (dayPrayers.length === 0) listEl.innerHTML = '<p class="text-gray-500 italic">Nenhuma oração registrada neste dia.</p>';
+  else {
+    listEl.innerHTML = dayPrayers.map(p => `
+      <div class="flex justify-between items-center bg-white border border-amber-200 rounded-lg px-3 py-2">
+        <div>
+          <div class="text-teal-900 font-semibold">${p.nome}</div>
+          ${p.observacoes ? `<div class="text-gray-600 text-sm italic">${p.observacoes}</div>` : ''}
+        </div>
+        <div class="text-right text-sm text-teal-700">
+          <div>${p.hora}</div>
+          <div>${p.responsavel}</div>
+        </div>
+      </div>`).join('');
+  }
+  document.getElementById('weekdayDetails').classList.add('hidden');
+  document.getElementById('dateDetails').classList.remove('hidden');
+  await renderCalendar();
+}
+
+// Render resumo dia da semana
+async function renderWeekdaySummary(weekday) {
+  weekdaySelected = weekday;
+  selectedDate = null;
+  const year = currentMonth.getFullYear();
+  const month = currentMonth.getMonth();
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const counts = {};
+  allPrayers.forEach(p => { counts[p.data] = (counts[p.data] || 0) + 1; });
   // Build list of all weekday occurrences in this month
   const occurrences = [];
   for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate() + 1)) {
     if (d.getDay() === weekday) occurrences.push(new Date(d));
   }
-
   // Compute totals and render
   const totalPrayers = occurrences.reduce((acc, d) => acc + (counts[toDateStr(d)] || 0), 0);
   const totalMinutes = totalPrayers * 5;
-
   const panel = document.getElementById('weekdayDetails');
   const title = document.getElementById('weekdayTitle');
   const countEl = document.getElementById('weekdayPrayerCount');
   const minEl = document.getElementById('weekdayTotalMinutes');
   const listEl = document.getElementById('weekdayOccurrences');
-
   title.textContent = `${WEEKDAY_LABELS[weekday]}s deste mês`;
   countEl.textContent = totalPrayers.toString();
   minEl.textContent = minutesToHuman(totalMinutes);
-
   listEl.innerHTML = occurrences.map(d => {
     const c = counts[toDateStr(d)] || 0;
     return `
@@ -241,16 +160,16 @@ async function renderWeekdaySummary(weekday) {
         <span class="text-teal-800 font-semibold">${c} • ${minutesToHuman(c*5)}</span>
       </div>`;
   }).join('');
-
   panel.classList.remove('hidden');
 }
 
 // Ir para Hoje
 function goToToday() {
-  const t = new Date();
-  t.setHours(0,0,0,0);
-  currentMonth = new Date(t.getFullYear(), t.getMonth(), 1);
-  renderCalendar().then(() => selectDate(t));
+  const today = new Date();
+  currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  renderCalendar().then(() => {
+    selectDate(today);
+  });
 }
 
 // Navegação mês
@@ -263,8 +182,7 @@ function wireEvents() {
   document.getElementById('nextMonth').addEventListener('click', nextMonth);
   document.getElementById('formOracao').addEventListener('submit', registrarOracao);
   document.getElementById('scheduleForm').addEventListener('submit', scheduleNewPrayer);
-  const todayBtn = document.getElementById('goToToday');
-  if (todayBtn) todayBtn.addEventListener('click', goToToday);
+  document.getElementById('goToToday').addEventListener('click', goToToday);
   document.querySelectorAll('.weekday-btn').forEach(btn => {
     btn.addEventListener('click', () => renderWeekdaySummary(parseInt(btn.dataset.weekday)));
   });
