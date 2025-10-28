@@ -7,70 +7,67 @@
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
-  <body class="bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 min-h-screen">
-    <main class="w-full max-w-6xl mx-auto bg-white/80 rounded-3xl shadow-xl border border-amber-100 p-6 flex flex-col gap-6 mt-8 mb-8">
+  <body class="bg-gradient-to-br from-blue-50 via-blue-100 to-indigo-100 min-h-screen">
+    <main class="w-full max-w-6xl mx-auto bg-white/90 rounded-3xl shadow-xl border border-blue-200 p-6 flex flex-col gap-6 mt-8 mb-8">
       <header class="text-center space-y-2 animate-fadeInDown">
-        <h1 class="text-3xl md:text-4xl font-bold text-teal-900 drop-shadow tracking-tight">Escala de Oração</h1>
-        <h2 class="text-xl md:text-2xl text-amber-600 mb-2">Escola Cristã Clássica</h2>
-        <div class="w-1/5 mx-auto border-t-2 border-amber-500 mb-2"></div>
+        <h1 class="text-3xl md:text-4xl font-bold text-blue-900 drop-shadow tracking-tight">Escala de Oração</h1>
+        <h2 class="text-xl md:text-2xl text-blue-700 mb-2">Escola Cristã Clássica</h2>
+        <div class="w-1/5 mx-auto border-t-2 border-blue-600 mb-2"></div>
       </header>
-
       <!-- Estatísticas: Hoje, Semana, Mês -->
       <section class="grid grid-cols-1 md:grid-cols-3 gap-4 animate-fadeIn">
-        <div class="bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl p-5 shadow-md border border-teal-200">
-          <h3 class="text-sm font-semibold text-teal-700 uppercase tracking-wide mb-2">Hoje</h3>
-          <div class="text-3xl font-bold text-teal-900" id="todayTotal">0 min</div>
-          <p class="text-xs text-teal-600 mt-1" id="todayCount">0 pessoas</p>
+        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-5 shadow-md border border-blue-300">
+          <h3 class="text-sm font-semibold text-blue-800 uppercase tracking-wide mb-2">Hoje</h3>
+          <div class="text-3xl font-bold text-blue-900" id="todayTotal">0 min</div>
+          <p class="text-xs text-blue-700 mt-1" id="todayCount">0 pessoas</p>
         </div>
-        <div class="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-5 shadow-md border border-amber-200">
-          <h3 class="text-sm font-semibold text-amber-700 uppercase tracking-wide mb-2">Esta Semana</h3>
-          <div class="text-3xl font-bold text-amber-900" id="weekTotal">0 min</div>
-          <p class="text-xs text-amber-600 mt-1" id="weekCount">0 pessoas</p>
+        <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-5 shadow-md border border-indigo-300">
+          <h3 class="text-sm font-semibold text-indigo-800 uppercase tracking-wide mb-2">Esta Semana</h3>
+          <div class="text-3xl font-bold text-indigo-900" id="weekTotal">0 min</div>
+          <p class="text-xs text-indigo-700 mt-1" id="weekCount">0 pessoas</p>
         </div>
-        <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-5 shadow-md border border-orange-200">
-          <h3 class="text-sm font-semibold text-orange-700 uppercase tracking-wide mb-2">Este Mês</h3>
-          <div class="text-3xl font-bold text-orange-900" id="monthTotal">0 min</div>
-          <p class="text-xs text-amber-600 mt-1" id="monthCount">0 pessoas</p>
+        <div class="bg-gradient-to-br from-sky-50 to-sky-100 rounded-xl p-5 shadow-md border border-sky-300">
+          <h3 class="text-sm font-semibold text-sky-800 uppercase tracking-wide mb-2">Este Mês</h3>
+          <div class="text-3xl font-bold text-sky-900" id="monthTotal">0 min</div>
+          <p class="text-xs text-sky-700 mt-1" id="monthCount">0 pessoas</p>
         </div>
       </section>
-
       <!-- Calendário -->
       <section class="mt-4 animate-fadeIn">
         <div class="flex justify-between items-center mb-4">
-          <button class="p-2 rounded-lg hover:bg-amber-100 transition" id="prevMonth">
-            <svg class="w-6 h-6 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button class="p-2 rounded-lg hover:bg-blue-100 transition" id="prevMonth">
+            <svg class="w-6 h-6 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
             </svg>
           </button>
-          <h3 class="text-xl font-bold text-amber-800" id="calendarMonth">Janeiro 2025</h3>
-          <button class="p-2 rounded-lg hover:bg-amber-100 transition" id="nextMonth">
-            <svg class="w-6 h-6 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <h3 class="text-xl font-bold text-blue-800" id="calendarMonth">Janeiro 2025</h3>
+          <button class="p-2 rounded-lg hover:bg-blue-100 transition" id="nextMonth">
+            <svg class="w-6 h-6 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
             </svg>
           </button>
         </div>
         <!-- Dias da semana -->
         <div class="grid grid-cols-7 gap-1 mb-2">
-          <div class="text-center text-xs font-semibold text-amber-600 p-2">Dom</div>
-          <div class="text-center text-xs font-semibold text-amber-600 p-2">Seg</div>
-          <div class="text-center text-xs font-semibold text-amber-600 p-2">Ter</div>
-          <div class="text-center text-xs font-semibold text-amber-600 p-2">Qua</div>
-          <div class="text-center text-xs font-semibold text-amber-600 p-2">Qui</div>
-          <div class="text-center text-xs font-semibold text-amber-600 p-2">Sex</div>
-          <div class="text-center text-xs font-semibold text-amber-600 p-2">Sáb</div>
+          <div class="text-center text-xs font-semibold text-blue-700 p-2">Dom</div>
+          <div class="text-center text-xs font-semibold text-blue-700 p-2">Seg</div>
+          <div class="text-center text-xs font-semibold text-blue-700 p-2">Ter</div>
+          <div class="text-center text-xs font-semibold text-blue-700 p-2">Qua</div>
+          <div class="text-center text-xs font-semibold text-blue-700 p-2">Qui</div>
+          <div class="text-center text-xs font-semibold text-blue-700 p-2">Sex</div>
+          <div class="text-center text-xs font-semibold text-blue-700 p-2">Sáb</div>
         </div>
         <!-- Dias do mês -->
         <div class="grid grid-cols-7 gap-1" id="calendarDays"></div>
         <!-- Botão para voltar ao dia atual -->
         <div class="mt-4 text-center hidden" id="goToTodayBtn">
-          <button class="bg-teal-600 text-white px-6 py-2 rounded-lg font-semibold shadow-lg transition hover:bg-teal-700 hover:scale-105" id="goToToday">
+          <button class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold shadow-lg transition hover:bg-blue-700 hover:scale-105" id="goToToday">
             ← Ir para Hoje
           </button>
         </div>
       </section>
-
       <!-- Painel do Dia Selecionado -->
-      <section class="mt-4 p-5 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-md border border-blue-200 hidden" id="dayPanel">
+      <section class="mt-4 p-5 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-md border border-blue-300 hidden" id="dayPanel">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-xl font-bold text-blue-900" id="dayPanelDate">1 de Janeiro, 2025</h3>
           <button class="text-blue-700 hover:text-blue-900 font-bold" id="closeDayPanel">
@@ -85,42 +82,38 @@
           <!-- Lista de participantes -->
         </div>
       </section>
-
-      <section class="text-center text-lg text-amber-900">
+      <section class="text-center text-lg text-blue-900">
         <p>
-          Dedique <span class="font-bold text-amber-600">5 minutos</span> de oração pelo projeto.
+          Dedique <span class="font-bold text-blue-700">5 minutos</span> de oração pelo projeto.
           Basta digitar seu nome ou apelido e registrar abaixo.
         </p>
       </section>
-
       <form class="w-full flex flex-col md:flex-row gap-4 justify-center items-center animate-fadeIn" id="formOracao">
         <input
           type="text"
           id="nameInput"
-          class="flex-1 px-4 py-2 rounded-lg border border-amber-400 bg-yellow-50 focus:ring-2 focus:ring-amber-400 outline-none transition"
+          class="flex-1 px-4 py-2 rounded-lg border border-blue-400 bg-blue-50 focus:ring-2 focus:ring-blue-500 outline-none transition"
           placeholder="Seu nome ou apelido"
           maxlength="50"
           required
           autocomplete="off"
         />
-        <button class="bg-amber-600 text-white px-6 py-2 rounded-lg font-semibold shadow-lg transition hover:bg-amber-700 hover:scale-105" type="submit">
+        <button class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold shadow-lg transition hover:bg-blue-700 hover:scale-105" type="submit">
           Registrar Oração
         </button>
       </form>
-
       <section class="mt-6 animate-fadeIn">
-        <h3 class="text-center text-xl font-semibold text-amber-700 mb-2">Quem já orou hoje</h3>
-        <p id="todayUniqueCount" class="text-center text-sm text-amber-700 mb-4">0 pessoas oraram hoje</p>
+        <h3 class="text-center text-xl font-semibold text-blue-800 mb-2">Quem já orou hoje</h3>
+        <p class="text-center text-sm text-blue-700 mb-4" id="todayUniqueCount">0 pessoas oraram hoje</p>
         <!-- Container dos cartões -->
-        <div id="cardsList" class="grid grid-cols-1 sm:grid-cols-2 gap-3" aria-live="polite" aria-relevant="additions"></div>
+        <div aria-live="polite" aria-relevant="additions" class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="cardsList"></div>
         <!-- Estado vazio -->
-        <div id="emptyState" class="p-4 text-center italic text-amber-400 text-base hidden">
+        <div class="p-4 text-center italic text-blue-400 text-base hidden" id="emptyState">
           Nenhuma oração registrada ainda. Seja o primeiro!
         </div>
       </section>
     </main>
-
     <!-- Scripts -->
-    <script type="module" src="./app.js"></script>
+    <script src="./app.js" type="module"></script>
   </body>
 </html>
