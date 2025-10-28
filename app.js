@@ -1,115 +1,67 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
 // Supabase client
 const supabase = createClient(
   'https://illgbfpmtcxiszihuyfh.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsbGdiZnBtdGN4aXN6aWh1eWZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1NzM4MTUsImV4cCI6MjA3NzE0OTgxNX0.lKoU_mX_5q7dWEFi3wi7-eRC-rhmfe4tuIkJTbbSHhM'
 );
-
 // ===== Timezone helpers (America/Sao_Paulo) =====
 const TZ = 'America/Sao_Paulo';
-function toSaopauloDate(d = new Date()) {
-  // get local time in Sao Paulo by formatting parts and reconstructing
+function toSaopauloDate(d = new Date()){
   const fmt = new Intl.DateTimeFormat('pt-BR', {
     timeZone: TZ,
     year: 'numeric', month: '2-digit', day: '2-digit',
     hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
   });
   const parts = Object.fromEntries(fmt.formatToParts(d).map(p => [p.type, p.value]));
-  // parts.day/month/year in pt-BR order
   return new Date(
-    Number(parts.year),
-    Number(parts.month) - 1,
-    Number(parts.day),
-    Number(parts.hour),
-    Number(parts.minute),
-    Number(parts.second)
+    Number(parts.year), Number(parts.month)-1, Number(parts.day),
+    Number(parts.hour), Number(parts.minute), Number(parts.second)
   );
 }
-function toDateStr(d) {
+function toDateStr(d){
   const sp = toSaopauloDate(d);
   const y = sp.getFullYear();
-  const m = String(sp.getMonth() + 1).padStart(2, '0');
-  const day = String(sp.getDate()).padStart(2, '0');
+  const m = String(sp.getMonth()+1).padStart(2,'0');
+  const day = String(sp.getDate()).padStart(2,'0');
   return `${y}-${m}-${day}`;
 }
-function toTimeStr(d) {
+function toTimeStr(d){
   const sp = toSaopauloDate(d);
-  const hh = String(sp.getHours()).padStart(2, '0');
-  const mm = String(sp.getMinutes()).padStart(2, '0');
-  const ss = String(sp.getSeconds()).padStart(2, '0');
+  const hh = String(sp.getHours()).padStart(2,'0');
+  const mm = String(sp.getMinutes()).padStart(2,'0');
+  const ss = String(sp.getSeconds()).padStart(2,'0');
   return `${hh}:${mm}:${ss}`;
 }
-function startOfDaySP(d) {
-  const sp = toSaopauloDate(d);
-  sp.setHours(0,0,0,0);
-  return sp;
-}
-function endOfDaySP(d) {
-  const sp = toSaopauloDate(d);
-  sp.setHours(23,59,59,999);
-  return sp;
-}
-
-// ===== Helpers for ranges =====
-function minutesToHuman(min){
-  return min >= 60 ? `${Math.floor(min/60)}h ${min%60}min` : `${min} min`;
-}
-function startOfWeek(d){
-  const x = new Date(d);
-  const day = (x.getDay()+7)%7;
-  x.setDate(x.getDate()-day);
-  x.setHours(0,0,0,0);
-  return x;
-}
-function endOfWeek(d){
-  const s = startOfWeek(d);
-  const e = new Date(s);
-  e.setDate(s.getDate()+6);
-  e.setHours(23,59,59,999);
-  return e;
-}
-function startOfMonth(d){
-  const x = new Date(d.getFullYear(), d.getMonth(), 1);
-  x.setHours(0,0,0,0);
-  return x;
-}
-function endOfMonth(d){
-  const x = new Date(d.getFullYear(), d.getMonth()+1, 0);
-  x.setHours(23,59,59,999);
-  return x;
-}
-
+function startOfDaySP(d){ const sp = toSaopauloDate(d); sp.setHours(0,0,0,0); return sp; }
+function endOfDaySP(d){ const sp = toSaopauloDate(d); sp.setHours(23,59,59,999); return sp; }
+// ===== Helpers =====
+function minutesToHuman(min){ return min >= 60 ? `${Math.floor(min/60)}h ${min%60}min` : `${min} min`; }
+function startOfWeek(d){ const x = new Date(d); const day = (x.getDay()+7)%7; x.setDate(x.getDate()-day); x.setHours(0,0,0,0); return x; }
+function endOfWeek(d){ const s = startOfWeek(d); const e = new Date(s); e.setDate(s.getDate()+6); e.setHours(23,59,59,999); return e; }
+function addDays(d, n){ const x = new Date(d); x.setDate(x.getDate()+n); return x; }
 // ===== State =====
-let currentMonth = startOfDaySP(new Date());
-currentMonth.setDate(1);
+let currentWeekStart = startOfWeek(startOfDaySP(new Date()));
 let selectedDate = startOfDaySP(new Date());
-
 // ===== Labels =====
-const WEEKDAY_LABELS = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+const WEEKDAY_LABELS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 const MONTH_LABELS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-
 // ===== Data cache =====
 let allPrayers = [];
-
 async function atualizarOracoes(){
   const { data, error } = await supabase.from('escala_oracao').select('*');
-  if (error) { console.error(error); return; }
+  if (error){ console.error(error); return; }
   allPrayers = data || [];
 }
-
-// Subscribe to realtime changes (insert/update/delete)
 function subscribeRealtime(){
-  try {
+  try{
     supabase.channel('escala_oracao_changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'escala_oracao' }, async () => {
         await atualizarOracoes();
         atualizarUI();
       })
       .subscribe();
-  } catch (e){ console.error('Realtime subscription error', e); }
+  }catch(e){ console.error('Realtime subscription error', e); }
 }
-
 // ===== Aggregations =====
 function getTotalsForDate(date){
   const ds = toDateStr(date);
@@ -124,9 +76,12 @@ function getTotalsForRange(start, end){
   const totalMin = list.reduce((acc,p)=> acc + (p.minutos || 5), 0);
   return { totalMin, count: new Set(list.map(p=>p.nome)).size };
 }
-function getTotalsForMonth(d){ return getTotalsForRange(startOfMonth(d), endOfMonth(d)); }
+function getTotalsForMonth(d){
+  const mStart = new Date(d.getFullYear(), d.getMonth(), 1);
+  const mEnd = new Date(d.getFullYear(), d.getMonth()+1, 0);
+  return getTotalsForRange(mStart, mEnd);
+}
 function getTotalsForWeek(d){ return getTotalsForRange(startOfWeek(d), endOfWeek(d)); }
-
 // ===== UI: Stats cards (today/week/month) =====
 function atualizarCardsResumo(baseDate){
   const { totalMin: todayMin, count: todayCount } = getTotalsForDate(baseDate);
@@ -145,29 +100,22 @@ function atualizarCardsResumo(baseDate){
   if (wc) wc.textContent = `${weekCount} pessoas`;
   if (mc) mc.textContent = `${monthCount} pessoas`;
 }
-
-// ===== UI: Hoje - preencher todayPrayersList e cardsList =====
+// ===== UI: Painel do dia =====
 function atualizarPainelDiario(){
   const todayStr = toDateStr(new Date());
   const panel = document.getElementById('todayPrayersPanel');
   const listEl = document.getElementById('todayPrayersList');
   const cardsEl = document.getElementById('cardsList');
   if (!panel || !listEl) return;
-
   const todayList = allPrayers.filter(p => p.data === todayStr);
-
-  // participantes únicos do dia, mantendo último horário por pessoa
   const uniqueByName = new Map();
   todayList.forEach(p => {
     const existing = uniqueByName.get(p.nome);
     if (!existing || (p.hora||'') > (existing.hora||'')) uniqueByName.set(p.nome, p);
   });
   const uniqueList = Array.from(uniqueByName.values()).sort((a,b)=> (a.hora||'').localeCompare(b.hora||''));
-
-  // Limpa listas
   listEl.innerHTML = '';
   if (cardsEl) cardsEl.innerHTML = '';
-
   if (uniqueList.length === 0){
     const p = document.createElement('p');
     p.className = 'text-sm text-blue-700 text-center col-span-full';
@@ -176,8 +124,6 @@ function atualizarPainelDiario(){
     if (cardsEl) cardsEl.appendChild(p.cloneNode(true));
     return;
   }
-
-  // Render itens (nome e hora)
   uniqueList.forEach(p => {
     const card = document.createElement('div');
     card.className = 'flex items-center justify-between gap-3 px-4 py-3 rounded-xl shadow-sm bg-white/80 border border-blue-200 hover:shadow-md hover:bg-white transition';
@@ -189,50 +135,46 @@ function atualizarPainelDiario(){
     right.textContent = p.hora || '';
     card.append(left, right);
     listEl.appendChild(card);
-
-    // cardsList recebe o mesmo card para manter "Quem já orou hoje" consistente
     if (cardsEl) cardsEl.appendChild(card.cloneNode(true));
   });
-
-  // Tempo total somado do dia no painel
   const totalMin = todayList.reduce((acc,x)=> acc + (x.minutos || 5), 0);
   const totalEl = document.getElementById('todaySummaryTotal');
   if (totalEl) totalEl.textContent = minutesToHuman(totalMin);
 }
-
-// ===== Calendar (UI azul clássica) =====
+// ===== Calendar (Semana compacta) =====
 function buildCalendar(){
   const daysGrid = document.getElementById('calendarDays');
   const monthTitle = document.getElementById('calendarMonth');
   if (!daysGrid || !monthTitle) return;
-  const base = new Date(currentMonth);
-  const month = base.getMonth();
-  const year = base.getFullYear();
-  monthTitle.textContent = `${MONTH_LABELS[month]} ${year}`;
-  const firstDay = new Date(year, month, 1);
-  const startWeekday = firstDay.getDay(); // 0..6
-  const daysInMonth = new Date(year, month+1, 0).getDate();
+  // Calculate current week range
+  const start = startOfWeek(currentWeekStart);
+  const end = endOfWeek(currentWeekStart);
+  // Title: Mês/ano e intervalo da semana
+  const rangeLabel = `${String(start.getDate()).padStart(2,'0')}/${String(start.getMonth()+1).padStart(2,'0')} – ${String(end.getDate()).padStart(2,'0')}/${String(end.getMonth()+1).padStart(2,'0')}`;
+  monthTitle.textContent = `${MONTH_LABELS[start.getMonth()]} ${start.getFullYear()} · Semana ${rangeLabel}`;
+  // Render 7 compact day buttons
   daysGrid.innerHTML = '';
-  // Leading blanks
-  for (let i=0;i<startWeekday;i++){
-    const ph = document.createElement('div');
-    ph.setAttribute('aria-hidden', 'true');
-    daysGrid.appendChild(ph);
-  }
+  daysGrid.className = 'grid grid-cols-7 gap-2 sm:gap-3';
   const todayStr = toDateStr(new Date());
-  for (let day=1; day<=daysInMonth; day++){
-    const d = new Date(year, month, day);
+  for (let i=0;i<7;i++){
+    const d = addDays(start, i);
     const ds = toDateStr(d);
+    const container = document.createElement('div');
+    container.className = 'flex flex-col items-center gap-1';
+    const label = document.createElement('div');
+    label.className = 'text-[11px] sm:text-xs text-blue-700';
+    label.textContent = WEEKDAY_LABELS[(d.getDay()+7)%7];
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = `aspect-square w-full rounded-md text-sm md:text-base flex items-center justify-center border ${ds===todayStr? 'bg-blue-100 border-blue-300 font-semibold':'bg-white/80 border-blue-200 hover:bg-white'}`;
-    btn.textContent = String(day);
-    btn.setAttribute('aria-label', `${day} de ${MONTH_LABELS[month]} de ${year}`);
+    btn.className = `w-full rounded-md px-0.5 py-2 text-sm sm:text-base border ${ds===todayStr? 'bg-blue-100 border-blue-300 font-semibold':'bg-white/80 border-blue-200 hover:bg-white'} `;
+    btn.textContent = String(d.getDate());
+    btn.setAttribute('aria-label', `${d.getDate()} de ${MONTH_LABELS[d.getMonth()]} de ${d.getFullYear()}`);
     btn.addEventListener('click', ()=> openDayPanel(d));
-    daysGrid.appendChild(btn);
+    container.append(label, btn);
+    daysGrid.appendChild(container);
   }
+  // Update summary for the visible week (optional future enhancement)
 }
-
 function openDayPanel(date){
   selectedDate = startOfDaySP(date);
   const panel = document.getElementById('selectedDayPanel');
@@ -268,8 +210,7 @@ function closeDayPanel(){
   const panel = document.getElementById('selectedDayPanel');
   if (panel) panel.classList.add('hidden');
 }
-
-// ===== Form submit (5 min quick register) =====
+// ===== Registrar rápido =====
 async function registrarOracao(event){
   event.preventDefault();
   const nameInput = document.getElementById('nameInput');
@@ -277,42 +218,32 @@ async function registrarOracao(event){
   if (!name){ alert('Por favor, digite seu nome ou apelido.'); return; }
   const now = new Date();
   const { error } = await supabase.from('escala_oracao').insert([
-    {
-      nome: name,
-      data: toDateStr(now),
-      hora: toTimeStr(now),
-      minutos: 5,
-      responsavel: name,
-      observacoes: ''
-    }
+    { nome: name, data: toDateStr(now), hora: toTimeStr(now), minutos: 5, responsavel: name, observacoes: '' }
   ]);
   if (error){ alert('Erro ao registrar oração! Tente novamente.'); return; }
   nameInput.value = '';
   await atualizarOracoes();
   atualizarUI();
 }
-
-// ===== Navegação por datas =====
+// ===== Navegação (semanas) =====
 function wireNavigation(){
-  const prev = document.getElementById('prevMonth');
+  const prev = document.getElementById('prevMonth'); // reutilizando ids existentes
   const next = document.getElementById('nextMonth');
   const goToday = document.getElementById('goToToday');
   const closeBtn = document.getElementById('closeDayPanel');
-  if (prev) prev.addEventListener('click', ()=>{ currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth()-1, 1); buildCalendar(); });
-  if (next) next.addEventListener('click', ()=>{ currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth()+1, 1); buildCalendar(); });
-  if (goToday) goToday.addEventListener('click', ()=>{ selectedDate = startOfDaySP(new Date()); currentMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1); buildCalendar(); openDayPanel(selectedDate); });
+  if (prev) prev.addEventListener('click', ()=>{ currentWeekStart = addDays(currentWeekStart, -7); buildCalendar(); });
+  if (next) next.addEventListener('click', ()=>{ currentWeekStart = addDays(currentWeekStart, 7); buildCalendar(); });
+  if (goToday) goToday.addEventListener('click', ()=>{ selectedDate = startOfDaySP(new Date()); currentWeekStart = startOfWeek(selectedDate); buildCalendar(); openDayPanel(selectedDate); });
   if (closeBtn) closeBtn.addEventListener('click', closeDayPanel);
 }
-
-// ===== Atualiza todos painéis/resumos =====
+// ===== Atualiza UI =====
 function atualizarUI(){
   atualizarPainelDiario();
   atualizarCardsResumo(startOfDaySP(new Date()));
   buildCalendar();
 }
-
 // ===== Init =====
-document.addEventListener('DOMContentLoaded', async () =>{
+document.addEventListener('DOMContentLoaded', async ()=>{
   await atualizarOracoes();
   subscribeRealtime();
   wireNavigation();
