@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-
+<html lang="pt-BR">
+<head>
   <meta charset="utf-8"/>
-  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
-  Escala de Oração • Escola Cristã Clássica
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Escala de Oração • Escola Cristã Clássica</title>
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-
+</head>
+<body class="bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 min-h-screen">
   <main class="w-full max-w-xl mx-auto bg-white/80 rounded-3xl shadow-xl border border-amber-100 p-6 flex flex-col gap-6 mt-8 mb-8">
     <header class="text-center space-y-2 animate-fadeInDown">
       <h1 class="text-3xl md:text-4xl font-bold text-teal-900 drop-shadow tracking-tight">Escala de Oração</h1>
@@ -15,110 +17,41 @@
 
     <section class="text-center text-lg text-amber-900">
       <p>
-        Dedique <span class="font-bold text-amber-600">5 minutos</span> de oração pelo projeto.
-        <br/>
+        Dedique <span class="font-bold text-amber-600">5 minutos</span> de oração pelo projeto.<br/>
         Basta digitar seu nome ou apelido e registrar abaixo.
       </p>
     </section>
 
     <form class="w-full flex flex-col md:flex-row gap-4 justify-center items-center animate-fadeIn" id="formOracao">
-      type="text"
-      id="nameInput"
-      class="flex-1 px-4 py-2 rounded-lg border border-amber-400 bg-yellow-50 focus:ring-2 focus:ring-amber-400 outline-none transition"
-      placeholder="Seu nome ou apelido"
-      maxlength="50"
-      required
-      autocomplete="off"
-    />
+      <input
+        type="text"
+        id="nameInput"
+        class="flex-1 px-4 py-2 rounded-lg border border-amber-400 bg-yellow-50 focus:ring-2 focus:ring-amber-400 outline-none transition"
+        placeholder="Seu nome ou apelido"
+        maxlength="50"
+        required
+        autocomplete="off"
+      />
       <button class="bg-amber-600 text-white px-6 py-2 rounded-lg font-semibold shadow-lg transition hover:bg-amber-700 hover:scale-105" type="submit">
         Registrar Oração
       </button>
     </form>
 
     <section class="mt-6 animate-fadeIn">
-      <h3 class="text-center text-xl font-semibold text-amber-700 mb-2">Quem já orou hoje</h3>
-      <!-- Mantemos o mesmo id do container -->
-      <div class="w-full" id="listaOradores">
-        <!-- Wrapper para cartões e tabela escondida para compatibilidade -->
-        <div class="space-y-3" id="cardsWrapper">
-          <!-- Tabela original (oculta visualmente, mantém ids para o JS existente) -->
-          <div class="overflow-hidden rounded-xl border border-amber-200 shadow-sm bg-white/60 hidden" id="legacyTableWrapper">
-            <table class="w-full text-left text-sm">
-              <thead class="bg-amber-50/80 text-amber-800">
-                <tr>
-                  <th class="px-4 py-3 font-semibold">Nome</th>
-                  <th class="px-4 py-3 font-semibold">Horário da oração</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-amber-100" id="tbodyOradores">
-                <!-- Linhas serão inseridas via JS -->
-              </tbody>
-            </table>
-            <div class="p-4 text-center italic text-amber-400 text-base" id="emptyState">Nenhuma oração registrada ainda. Seja o primeiro!</div>
-          </div>
-
-          <!-- Lista de cartões (render espelhado do tbody) -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="cardsList" aria-live="polite" aria-relevant="additions"></div>
-          <div class="p-4 text-center italic text-amber-400 text-base" id="emptyStateCards">Nenhuma oração registrada ainda. Seja o primeiro!</div>
-        </div>
+      <h3 class="text-center text-xl font-semibold text-amber-700 mb-4">Quem já orou hoje</h3>
+      
+      <!-- Container único para os cartões -->
+      <div id="cardsList" class="grid grid-cols-1 sm:grid-cols-2 gap-3" aria-live="polite" aria-relevant="additions"></div>
+      
+      <!-- Estado vazio ÚNICO -->
+      <div id="emptyState" class="p-4 text-center italic text-amber-400 text-base hidden">
+        Nenhuma oração registrada ainda. Seja o primeiro!
       </div>
     </section>
-
-    <!-- Calendário e demais seções permanecem iguais -->
   </main>
 
-  <script type="module">
-    // Espelha inserções do app.js (que adiciona linhas no tbodyOradores) para cartões visuais
-    const ensureSetup = () => {
-      const tbody = document.getElementById('tbodyOradores');
-      const cards = document.getElementById('cardsList');
-      const emptyCards = document.getElementById('emptyStateCards');
-      if (!tbody || !cards) return;
-
-      const renderRowAsCard = (nome, horario) => {
-        const card = document.createElement('div');
-        card.className = 'flex items-center justify-between gap-3 px-4 py-3 rounded-xl shadow-sm bg-white/70 border border-amber-200 hover:shadow-md hover:bg-white/80 transition';
-
-        const left = document.createElement('div');
-        left.className = 'text-teal-900 font-medium truncate';
-        left.textContent = nome;
-
-        const right = document.createElement('div');
-        right.className = 'text-amber-800 font-semibold tabular-nums';
-        right.textContent = horario;
-
-        card.appendChild(left);
-        card.appendChild(right);
-        cards.appendChild(card);
-      };
-
-      const syncFromTbody = () => {
-        cards.innerHTML = '';
-        const rows = Array.from(tbody.querySelectorAll('tr'));
-        if (rows.length === 0) {
-          emptyCards?.classList.remove('hidden');
-          return;
-        }
-        emptyCards?.classList.add('hidden');
-        for (const tr of rows) {
-          const tds = tr.querySelectorAll('td');
-          if (tds.length >= 2) {
-            renderRowAsCard(tds[0].textContent?.trim() || '', tds[1].textContent?.trim() || '');
-          }
-        }
-      };
-
-      // Observa mudanças no tbody para espelhar em tempo real
-      const observer = new MutationObserver(syncFromTbody);
-      observer.observe(tbody, { childList: true });
-      // Primeira sincronização
-      syncFromTbody();
-    };
-
-    // Aguarda DOM pronto
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', ensureSetup);
-    } else {
-      ensureSetup();
-    }
-  </script>
+  <!-- Scripts externos -->
+  <script type="module" src="./supabaseClient.js"></script>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
