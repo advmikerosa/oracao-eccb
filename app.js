@@ -51,15 +51,7 @@ function endOfDaySP(d) {
   return sp;
 }
 
-// ===== State =====
-let currentMonth = startOfDaySP(new Date());
-currentMonth.setDate(1);
-let selectedDate = startOfDaySP(new Date());
-
-// ===== Labels =====
-const WEEKDAY_LABELS = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
-const MONTH_LABELS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-
+// ===== Helpers for ranges =====
 function minutesToHuman(min){
   return min >= 60 ? `${Math.floor(min/60)}h ${min%60}min` : `${min} min`;
 }
@@ -88,12 +80,34 @@ function endOfMonth(d){
   return x;
 }
 
+// ===== State =====
+let currentMonth = startOfDaySP(new Date());
+currentMonth.setDate(1);
+let selectedDate = startOfDaySP(new Date());
+
+// ===== Labels =====
+const WEEKDAY_LABELS = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+const MONTH_LABELS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
 // ===== Data cache =====
 let allPrayers = [];
+
 async function atualizarOracoes(){
   const { data, error } = await supabase.from('escala_oracao').select('*');
   if (error) { console.error(error); return; }
   allPrayers = data || [];
+}
+
+// Subscribe to realtime changes (insert/update/delete)
+function subscribeRealtime(){
+  try {
+    supabase.channel('escala_oracao_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'escala_oracao' }, async () => {
+        await atualizarOracoes();
+        atualizarUI();
+      })
+      .subscribe();
+  } catch (e){ console.error('Realtime subscription error', e); }
 }
 
 // ===== Aggregations =====
@@ -101,7 +115,7 @@ function getTotalsForDate(date){
   const ds = toDateStr(date);
   const list = allPrayers.filter(p => p.data === ds);
   const totalMin = list.reduce((acc,p)=> acc + (p.minutos || 5), 0);
-  return { totalMin, count: list.length, list };
+  return { totalMin, count: new Set(list.map(p=>p.nome)).size, list };
 }
 function getTotalsForRange(start, end){
   const s = toDateStr(start);
@@ -113,9 +127,9 @@ function getTotalsForRange(start, end){
 function getTotalsForMonth(d){ return getTotalsForRange(startOfMonth(d), endOfMonth(d)); }
 function getTotalsForWeek(d){ return getTotalsForRange(startOfWeek(d), endOfWeek(d)); }
 
-// ===== UI: Stats cards =====
+// ===== UI: Stats cards (today/week/month) =====
 function atualizarCardsResumo(baseDate){
-  const { totalMin: todayMin } = getTotalsForDate(baseDate);
+  const { totalMin: todayMin, count: todayCount } = getTotalsForDate(baseDate);
   const { totalMin: weekMin, count: weekCount } = getTotalsForWeek(baseDate);
   const { totalMin: monthMin, count: monthCount } = getTotalsForMonth(baseDate);
   const todayEl = document.getElementById('todayTotal');
@@ -127,79 +141,91 @@ function atualizarCardsResumo(baseDate){
   if (todayEl) todayEl.textContent = minutesToHuman(todayMin);
   if (weekEl) weekEl.textContent = minutesToHuman(weekMin);
   if (monthEl) monthEl.textContent = minutesToHuman(monthMin);
-  if (tc) tc.textContent = `${getTotalsForDate(baseDate).count} pessoas`;
+  if (tc) tc.textContent = `${todayCount} pessoas`;
   if (wc) wc.textContent = `${weekCount} pessoas`;
   if (mc) mc.textContent = `${monthCount} pessoas`;
 }
 
-// ===== UI: Today panel =====
+// ===== UI: Hoje - preencher todayPrayersList e cardsList =====
 function atualizarPainelDiario(){
   const todayStr = toDateStr(new Date());
   const panel = document.getElementById('todayPrayersPanel');
   const listEl = document.getElementById('todayPrayersList');
+  const cardsEl = document.getElementById('cardsList');
   if (!panel || !listEl) return;
+
   const todayList = allPrayers.filter(p => p.data === todayStr);
+
+  // participantes únicos do dia, mantendo último horário por pessoa
   const uniqueByName = new Map();
-  // Keep latest record per person by hora
   todayList.forEach(p => {
     const existing = uniqueByName.get(p.nome);
     if (!existing || (p.hora||'') > (existing.hora||'')) uniqueByName.set(p.nome, p);
   });
   const uniqueList = Array.from(uniqueByName.values()).sort((a,b)=> (a.hora||'').localeCompare(b.hora||''));
+
+  // Limpa listas
   listEl.innerHTML = '';
+  if (cardsEl) cardsEl.innerHTML = '';
+
   if (uniqueList.length === 0){
     const p = document.createElement('p');
-    p.className = 'text-sm text-teal-600 text-center col-span-full';
+    p.className = 'text-sm text-blue-700 text-center col-span-full';
     p.textContent = 'Nenhum registro ainda hoje.';
     listEl.appendChild(p);
+    if (cardsEl) cardsEl.appendChild(p.cloneNode(true));
     return;
   }
+
+  // Render itens (nome e hora)
   uniqueList.forEach(p => {
     const card = document.createElement('div');
-    card.className = 'flex items-center justify-between gap-3 px-4 py-3 rounded-xl shadow-sm bg-white/70 border border-amber-200 hover:shadow-md hover:bg-white/80 transition';
+    card.className = 'flex items-center justify-between gap-3 px-4 py-3 rounded-xl shadow-sm bg-white/80 border border-blue-200 hover:shadow-md hover:bg-white transition';
     const left = document.createElement('div');
-    left.className = 'text-teal-900 font-medium truncate';
+    left.className = 'text-blue-900 font-medium truncate';
     left.textContent = p.nome;
     const right = document.createElement('div');
-    right.className = 'text-amber-800 font-semibold tabular-nums';
+    right.className = 'text-blue-800 font-semibold tabular-nums';
     right.textContent = p.hora || '';
     card.append(left, right);
     listEl.appendChild(card);
+
+    // cardsList recebe o mesmo card para manter "Quem já orou hoje" consistente
+    if (cardsEl) cardsEl.appendChild(card.cloneNode(true));
   });
+
+  // Tempo total somado do dia no painel
+  const totalMin = todayList.reduce((acc,x)=> acc + (x.minutos || 5), 0);
+  const totalEl = document.getElementById('todaySummaryTotal');
+  if (totalEl) totalEl.textContent = minutesToHuman(totalMin);
 }
 
-// ===== Calendar =====
+// ===== Calendar (UI azul clássica) =====
 function buildCalendar(){
   const daysGrid = document.getElementById('calendarDays');
   const monthTitle = document.getElementById('calendarMonth');
   if (!daysGrid || !monthTitle) return;
-
   const base = new Date(currentMonth);
   const month = base.getMonth();
   const year = base.getFullYear();
   monthTitle.textContent = `${MONTH_LABELS[month]} ${year}`;
-
-  // Determine first weekday
   const firstDay = new Date(year, month, 1);
   const startWeekday = firstDay.getDay(); // 0..6
   const daysInMonth = new Date(year, month+1, 0).getDate();
-
   daysGrid.innerHTML = '';
-
   // Leading blanks
   for (let i=0;i<startWeekday;i++){
     const ph = document.createElement('div');
     ph.setAttribute('aria-hidden', 'true');
     daysGrid.appendChild(ph);
   }
-
   const todayStr = toDateStr(new Date());
   for (let day=1; day<=daysInMonth; day++){
     const d = new Date(year, month, day);
     const ds = toDateStr(d);
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = `aspect-square w-full rounded-md text-sm md:text-base flex items-center justify-center border ${ds===todayStr? 'bg-amber-100 border-amber-300 font-semibold':'bg-white/70 border-amber-200 hover:bg-white'}`;
+    btn.className = `aspect-square w-full rounded-md text-sm md:text-base flex items-center justify-center border ${ds===todayStr? 'bg-blue-100 border-blue-300 font-semibold':'bg-white/80 border-blue-200 hover:bg-white'}`;
     btn.textContent = String(day);
     btn.setAttribute('aria-label', `${day} de ${MONTH_LABELS[month]} de ${year}`);
     btn.addEventListener('click', ()=> openDayPanel(d));
@@ -220,19 +246,19 @@ function openDayPanel(date){
   const items = allPrayers.filter(p=> p.data===ds).sort((a,b)=> (a.hora||'').localeCompare(b.hora||''));
   if (items.length===0){
     const p = document.createElement('p');
-    p.className = 'text-sm text-amber-600 text-center col-span-full';
+    p.className = 'text-sm text-blue-700 text-center col-span-full';
     p.textContent = 'Nenhum registro neste dia.';
     list.appendChild(p);
     return;
   }
   items.forEach(p=>{
     const card = document.createElement('div');
-    card.className = 'flex items-center justify-between gap-3 px-4 py-3 rounded-xl shadow-sm bg-white/70 border border-amber-200';
+    card.className = 'flex items-center justify-between gap-3 px-4 py-3 rounded-xl shadow-sm bg-white/80 border border-blue-200';
     const left = document.createElement('div');
-    left.className = 'text-teal-900 font-medium truncate';
+    left.className = 'text-blue-900 font-medium truncate';
     left.textContent = p.nome;
     const right = document.createElement('div');
-    right.className = 'text-amber-800 font-semibold tabular-nums';
+    right.className = 'text-blue-800 font-semibold tabular-nums';
     right.textContent = p.hora || '';
     card.append(left,right);
     list.appendChild(card);
@@ -263,12 +289,10 @@ async function registrarOracao(event){
   if (error){ alert('Erro ao registrar oração! Tente novamente.'); return; }
   nameInput.value = '';
   await atualizarOracoes();
-  atualizarPainelDiario();
-  atualizarCardsResumo(startOfDaySP(new Date()));
-  buildCalendar();
+  atualizarUI();
 }
 
-// ===== Navigation buttons =====
+// ===== Navegação por datas =====
 function wireNavigation(){
   const prev = document.getElementById('prevMonth');
   const next = document.getElementById('nextMonth');
@@ -280,13 +304,19 @@ function wireNavigation(){
   if (closeBtn) closeBtn.addEventListener('click', closeDayPanel);
 }
 
-// ===== Init =====
-document.addEventListener('DOMContentLoaded', async ()=>{
-  await atualizarOracoes();
-  wireNavigation();
+// ===== Atualiza todos painéis/resumos =====
+function atualizarUI(){
   atualizarPainelDiario();
   atualizarCardsResumo(startOfDaySP(new Date()));
   buildCalendar();
+}
+
+// ===== Init =====
+document.addEventListener('DOMContentLoaded', async () =>{
+  await atualizarOracoes();
+  subscribeRealtime();
+  wireNavigation();
+  atualizarUI();
   const form = document.getElementById('prayerForm');
   if (form) form.addEventListener('submit', registrarOracao);
 });
